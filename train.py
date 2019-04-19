@@ -19,7 +19,7 @@ import time
 cudnn.benchmark = True
 
 torch.manual_seed(2018)
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'

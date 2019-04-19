@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 
-datasets_root = '/home/qub/data/saliency'
+datasets_root = '/home/ty/data'
 
 # For each dataset, I put images and masks together
 msra10k_path = os.path.join(datasets_root, 'msra10k')

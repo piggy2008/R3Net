@@ -25,10 +25,10 @@ time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
-imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq3.txt')
+imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq2.txt')
 args = {
-    'iter_num': 10000,
-    'iter_save': 2000,
+    'iter_num': 30000,
+    'iter_save': 10000,
     'train_batch_size': 6,
     'last_iter': 0,
     'lr': 1e-3,

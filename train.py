@@ -29,7 +29,7 @@ imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq3.txt')
 args = {
     'iter_num': 10000,
     'iter_save': 2000,
-    'train_batch_size': 4,
+    'train_batch_size': 14,
     'last_iter': 0,
     'lr': 1e-3,
     'lr_decay': 0.9,

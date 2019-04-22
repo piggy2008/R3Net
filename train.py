@@ -58,7 +58,7 @@ log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.tx
 
 
 def main():
-    net = R3Net().cuda().train()
+    net = R3Net(motion=True).cuda().train()
 
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],

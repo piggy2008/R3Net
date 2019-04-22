@@ -18,17 +18,17 @@ torch.manual_seed(2018)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'R3Net'
+exp_name = 'VideoSaliency_2019-04-20 23:11:17'
 
 args = {
-    'snapshot': '6000',  # your snapshot filename (exclude extension name)
+    'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }
 
 img_transform = transforms.Compose([
     transforms.ToTensor(),
-    # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 to_pil = transforms.ToPILImage()
 

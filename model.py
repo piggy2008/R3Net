@@ -1,13 +1,17 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
+from module.convGRU import ConvGRU
 
 from resnext.resnext101 import ResNeXt101
 
 
 class R3Net(nn.Module):
-    def __init__(self):
+    def __init__(self, motion=False):
         super(R3Net, self).__init__()
+
+        self.motion = motion
+
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
@@ -25,6 +29,22 @@ class R3Net(nn.Module):
             nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
             _ASPP(256)
         )
+        if self.motion:
+            self.reduce_low_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
+                                     hidden_dim=256,
+                                     kernel_size=(3, 3),
+                                     num_layers=1,
+                                     batch_first=True,
+                                     bias=True,
+                                     return_all_layers=False)
+
+            self.reduce_high_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
+                                          hidden_dim=256,
+                                          kernel_size=(3, 3),
+                                          num_layers=1,
+                                          batch_first=True,
+                                          bias=True,
+                                          return_all_layers=False)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -77,6 +97,12 @@ class R3Net(nn.Module):
             layer3,
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
+
+        if self.motion:
+            low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
+            reduce_low = low_side[0].squeeze(0)
+            high_side, high_state = self.reduce_high_GRU(reduce_high.unsqueeze(0))
+            reduce_high = high_side[0].squeeze(0)
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

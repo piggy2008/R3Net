@@ -6,7 +6,7 @@ from PIL import Image
 from torch.autograd import Variable
 from torchvision import transforms
 
-from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path
+from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model import R3Net
 
@@ -23,7 +23,8 @@ exp_name = 'VideoSaliency_2019-04-20 23:11:17'
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
-    'save_results': True  # whether to save the resulting masks
+    'save_results': True,  # whether to save the resulting masks
+    'input_size': (473, 473)
 }
 
 img_transform = transforms.Compose([
@@ -34,9 +35,9 @@ to_pil = transforms.ToPILImage()
 
 # to_test = {'ecssd': ecssd_path, 'hkuis': hkuis_path, 'pascal': pascals_path, 'sod': sod_path, 'dutomron': dutomron_path}
 # to_test = {'ecssd': ecssd_path}
-to_test = {'davis': '/home/qub/data/saliency/davis/davis_test2'}
-gt_root = '/home/qub/data/saliency/davis/GT'
-imgs_path = '/home/qub/data/saliency/davis/davis_test2_single.txt'
+to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+gt_root = os.path.join(davis_path, 'GT')
+imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
 def main():
     net = R3Net()
 
@@ -61,9 +62,13 @@ def main():
                 print ('predicting for %s: %d / %d' % (name, idx + 1, len(img_list)))
 
                 img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
+                shape = img.size
+                img = img.resize(args['input_size'])
                 img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
                 prediction = net(img_var)
-                prediction = np.array(to_pil(prediction.data.squeeze(0).cpu()))
+                precision = to_pil(prediction.data.squeeze(0).cpu())
+                precision = precision.resize(shape)
+                prediction = np.array(precision)
 
                 if args['crf_refine']:
                     prediction = crf_refine(np.array(img), prediction)

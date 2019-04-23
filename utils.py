@@ -3,7 +3,7 @@ import os
 from model import R3Net
 
 def load_part_of_model(new_model, src_model_path):
-    src_model = torch.load(src_model_path, map_location='cuda:0')
+    src_model = torch.load(src_model_path, map_location='cuda:2')
     m_dict = new_model.state_dict()
     for k in src_model.keys():
         print(k)

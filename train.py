@@ -20,7 +20,7 @@ from utils import load_part_of_model
 cudnn.benchmark = True
 
 torch.manual_seed(2019)
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
@@ -37,8 +37,8 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
-    'pretrain': ''
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
+    # 'pretrain': ''
 }
 
 joint_transform = joint_transforms.Compose([

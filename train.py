@@ -15,10 +15,11 @@ from misc import AvgMeter, check_mkdir
 from model import R3Net
 from torch.backends import cudnn
 import time
+from utils import load_part_of_model
 
 cudnn.benchmark = True
 
-torch.manual_seed(2018)
+torch.manual_seed(2019)
 torch.cuda.set_device(2)
 
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -31,11 +32,12 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-3,
+    'lr': 1e-4,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
-    'snapshot': ''
+    'snapshot': '',
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
 }
 
 joint_transform = joint_transforms.Compose([
@@ -60,6 +62,7 @@ log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.tx
 def main():
     net = R3Net(motion=True).cuda().train()
 
+
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},
@@ -68,11 +71,15 @@ def main():
     ], momentum=args['momentum'])
 
     if len(args['snapshot']) > 0:
-        print ('training resumes from ' + args['snapshot'])
+        print('training resumes from ' + args['snapshot'])
         net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth')))
         optimizer.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '_optim.pth')))
         optimizer.param_groups[0]['lr'] = 2 * args['lr']
         optimizer.param_groups[1]['lr'] = args['lr']
+
+    if len(args['pretrain']) > 0:
+        print('pretrain model from ' + args['pretrain'])
+        net = load_part_of_model(net, args['pretrain'])
 
     check_mkdir(ckpt_path)
     check_mkdir(os.path.join(ckpt_path, exp_name))

@@ -37,7 +37,7 @@ to_pil = transforms.ToPILImage()
 # to_test = {'ecssd': ecssd_path}
 to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
 gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
+imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 def main():
     net = R3Net(motion=True)
 
@@ -58,22 +58,26 @@ def main():
                 check_mkdir(os.path.join(ckpt_path, exp_name, '(%s) %s_%s' % (exp_name, name, args['snapshot'])))
             img_list = [i_id.strip() for i_id in open(imgs_path)]
             # img_list = [os.path.splitext(f)[0] for f in os.listdir(root) if f.endswith('.jpg')]
-            for idx, img_name in enumerate(img_list):
+            for idx, img_names in enumerate(img_list):
                 print ('predicting for %s: %d / %d' % (name, idx + 1, len(img_list)))
+                img_seq = img_names.split(',')
+                img_var = []
+                for img_name in img_seq:
+                    img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
+                    shape = img.size
+                    img = img.resize(args['input_size'])
+                    img_var.append(Variable(img_transform(img).unsqueeze(0), volatile=True).cuda())
 
-                img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
-                shape = img.size
-                img = img.resize(args['input_size'])
-                img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
+                img_var = torch.cat(img_var, dim=0)
                 prediction = net(img_var)
-                precision = to_pil(prediction.data.squeeze(0).cpu())
+                precision = to_pil(prediction.data[-1].cpu())
                 precision = precision.resize(shape)
                 prediction = np.array(precision)
 
                 if args['crf_refine']:
                     prediction = crf_refine(np.array(img), prediction)
 
-                gt = np.array(Image.open(os.path.join(gt_root, img_name + '.png')).convert('L'))
+                gt = np.array(Image.open(os.path.join(gt_root, img_seq[-1] + '.png')).convert('L'))
                 precision, recall, mae = cal_precision_recall_mae(prediction, gt)
                 for pidx, pdata in enumerate(zip(precision, recall)):
                     p, r = pdata

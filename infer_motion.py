@@ -39,7 +39,7 @@ to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
 gt_root = os.path.join(davis_path, 'GT')
 imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 def main():
-    net = R3Net(motion=True)
+    net = R3Net(motion='GRU')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))

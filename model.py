@@ -2,12 +2,13 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from module.convGRU import ConvGRU
+from module.convLSTM import ConvLSTM
 
 from resnext.resnext101 import ResNeXt101
 
 
 class R3Net(nn.Module):
-    def __init__(self, motion=False):
+    def __init__(self, motion='GRU'):
         super(R3Net, self).__init__()
 
         self.motion = motion
@@ -29,7 +30,7 @@ class R3Net(nn.Module):
             nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
             _ASPP(256)
         )
-        if self.motion:
+        if self.motion == 'GRU':
             self.reduce_low_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
                                      hidden_dim=256,
                                      kernel_size=(3, 3),
@@ -45,6 +46,26 @@ class R3Net(nn.Module):
                                           batch_first=True,
                                           bias=True,
                                           return_all_layers=False)
+        elif self.motion == 'LSTM':
+            self.reduce_low_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
+                                          hidden_dim=256,
+                                          kernel_size=(3, 3),
+                                          num_layers=1,
+                                          padding=1,
+                                          dilation=1,
+                                          batch_first=True,
+                                          bias=True,
+                                          return_all_layers=False)
+
+            self.reduce_high_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
+                                           hidden_dim=256,
+                                           kernel_size=(3, 3),
+                                           num_layers=1,
+                                           padding=1,
+                                           dilation=1,
+                                           batch_first=True,
+                                           bias=True,
+                                           return_all_layers=False)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -98,7 +119,7 @@ class R3Net(nn.Module):
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
 
-        if self.motion:
+        if len(self.motion) > 0:
             low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
             reduce_low = low_side[0].squeeze(0)
             high_side, high_state = self.reduce_high_GRU(reduce_high.unsqueeze(0))

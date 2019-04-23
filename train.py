@@ -20,7 +20,7 @@ from utils import load_part_of_model
 cudnn.benchmark = True
 
 torch.manual_seed(2019)
-torch.cuda.set_device(1)
+torch.cuda.set_device(2)
 
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
@@ -30,7 +30,7 @@ imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq2.txt')
 args = {
     'iter_num': 30000,
     'iter_save': 10000,
-    'train_batch_size': 5,
+    'train_batch_size': 4,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,

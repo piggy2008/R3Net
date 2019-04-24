@@ -31,13 +31,13 @@ class R3Net(nn.Module):
             _ASPP(256)
         )
         if self.motion == 'GRU':
-            self.reduce_low_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
-                                     hidden_dim=256,
-                                     kernel_size=(3, 3),
-                                     num_layers=1,
-                                     batch_first=True,
-                                     bias=True,
-                                     return_all_layers=False)
+            # self.reduce_low_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
+            #                          hidden_dim=256,
+            #                          kernel_size=(3, 3),
+            #                          num_layers=1,
+            #                          batch_first=True,
+            #                          bias=True,
+            #                          return_all_layers=False)
 
             self.reduce_high_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
                                           hidden_dim=256,
@@ -46,16 +46,18 @@ class R3Net(nn.Module):
                                           batch_first=True,
                                           bias=True,
                                           return_all_layers=False)
+            self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
+
         elif self.motion == 'LSTM':
-            self.reduce_low_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
-                                          hidden_dim=256,
-                                          kernel_size=(3, 3),
-                                          num_layers=1,
-                                          padding=1,
-                                          dilation=1,
-                                          batch_first=True,
-                                          bias=True,
-                                          return_all_layers=False)
+            # self.reduce_low_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
+            #                               hidden_dim=256,
+            #                               kernel_size=(3, 3),
+            #                               num_layers=1,
+            #                               padding=1,
+            #                               dilation=1,
+            #                               batch_first=True,
+            #                               bias=True,
+            #                               return_all_layers=False)
 
             self.reduce_high_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
                                            hidden_dim=256,
@@ -66,6 +68,7 @@ class R3Net(nn.Module):
                                            batch_first=True,
                                            bias=True,
                                            return_all_layers=False)
+            self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -120,12 +123,15 @@ class R3Net(nn.Module):
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
 
         if len(self.motion) > 0:
-            low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
-            reduce_low = low_side[0].squeeze(0)
+            # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
+            # reduce_low = low_side[0].squeeze(0)
             high_side, high_state = self.reduce_high_GRU(reduce_high.unsqueeze(0))
-            reduce_high = high_side[0].squeeze(0)
+            high_motion = high_side[0].squeeze(0)
+            motion_predict = self.motion_predict(high_motion)
+            predict0 = self.predict0(reduce_high) + motion_predict
+        else:
+            predict0 = self.predict0(reduce_high)
 
-        predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
         predict2 = self.predict2(torch.cat((predict1, reduce_high), 1)) + predict1
         predict3 = self.predict3(torch.cat((predict2, reduce_low), 1)) + predict2

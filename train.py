@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -63,7 +63,7 @@ log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.tx
 
 
 def main():
-    net = R3Net(motion='LSTM').cuda().train()
+    net = R3Net(motion='GRU').cuda().train()
 
 
     optimizer = optim.SGD([

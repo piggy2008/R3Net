@@ -30,17 +30,17 @@ imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq2.txt')
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 args = {
     'motion': 'GRU',
-    'iter_num': 10000,
-    'iter_save': 5000,
+    'iter_num': 30000,
+    'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-5,
+    'lr': 1e-3,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
-    # 'pretrain': ''
+    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
+    'pretrain': ''
 }
 
 joint_transform = joint_transforms.Compose([

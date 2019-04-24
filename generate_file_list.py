@@ -27,7 +27,7 @@ def generate_seq(path, save_path, batch):
                 image = images[i + j]
                 print (os.path.join(path, folder, image))
                 name, suffix = os.path.splitext(image)
-                path_temp = os.path.join(folder, name)
+                path_temp = os.path.join('DAFB3', folder, name)
                 if j == (batch - 1):
                     image_batch = image_batch + path_temp
                 else:

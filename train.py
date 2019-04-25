@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -37,7 +37,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-25 00:54:41', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth'),
     # 'pretrain': '',
     # 'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
     'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
@@ -70,11 +70,21 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.BCEWithLogitsLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
 
+def fix_parameters(parameters):
+    for name, parameter in parameters:
+        if name.find('motion') >= 0 \
+                or name.find('GRU') >= 0 or name.find('predict') >= 0:
+            print(name, 'is not fixed')
+
+        else:
+            print(name, 'is fixed')
+            parameter.requires_grad = False
+
 
 def main():
     net = R3Net(motion=args['motion']).cuda().train()
 
-
+    fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

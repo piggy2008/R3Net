@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch import nn
 from module.convGRU import ConvGRU
 from module.convLSTM import ConvLSTM
+from matplotlib import pyplot as plt
 
 from resnext.resnext101 import ResNeXt101
 

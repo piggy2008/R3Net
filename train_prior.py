@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -28,21 +28,21 @@ exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
     'motion': '',
-    'iter_num': 20000,
+    'iter_num': 30000,
     'iter_save': 10000,
-    'train_batch_size': 1,
+    'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-5,
+    'lr': 1e-4,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
     'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth'),
     # 'pretrain': '',
-    # 'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
-    'imgs_file': 'video_saliency/train_all_DAFB2_seq_5f.txt',
-    # 'train_loader': 'video_image'
-    'train_loader': 'video_sequence'
+    'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
+    # 'imgs_file': 'video_saliency/train_all_DAFB2_seq_5f.txt',
+    'train_loader': 'video_image'
+    # 'train_loader': 'video_sequence'
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])

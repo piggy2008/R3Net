@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -26,22 +26,27 @@ time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
-imgs_file = os.path.join(datasets_root, 'Pre-train/pretrain_all_seq2.txt')
-# imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 args = {
     'motion': 'GRU',
-    'iter_num': 30000,
-    'iter_save': 10000,
-    'train_batch_size': 5,
+    'iter_num': 10000,
+    'iter_save': 5000,
+    'train_batch_size': 1,
     'last_iter': 0,
-    'lr': 1e-3,
+    'lr': 1e-6,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth')
-    'pretrain': ''
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '5000.pth'),
+    # 'pretrain': '',
+    # 'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
+    'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
+    # 'train_loader': 'video_image'
+    'train_loader': 'video_sequence'
 }
+
+imgs_file = os.path.join(datasets_root, args['imgs_file'])
+# imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
 joint_transform = joint_transforms.Compose([
     joint_transforms.RandomCrop(473),
@@ -55,8 +60,11 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
-# train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
+if args['train_loader'] == 'video_sequence':
+    train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
+else:
+    train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
+
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)
 
 criterion = nn.BCEWithLogitsLoss().cuda()

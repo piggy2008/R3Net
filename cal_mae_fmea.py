@@ -49,6 +49,4 @@ print (results)
 # MSRA10K + DAVIS(input no mea & std) snap:30000 {'davis': {'mae': 0.03403602471853535}, 'fmeasure': 0.8208723312824877}
 # MSRA10K + DAVIS snap:30000 {'davis': {'mae': 0.02795341027164935}, 'fmeasure': 0.846696146351338}
 # MSRA10K + DAVIS resize:473*473 snap:30000 {'davis': 'mae': 0.02464488739008121, ''fmeasure': 0.8753527027151914}
-# MSRA10K + DAVIS finetune + GRU resize:473*473 snap:30000 {'davis': {'mae': 0.026164189245066576, 'fmeasure': 0.867808967452949}}
-# MSRA10K + DAVIS finetune + GRU resize:473*473 snap:20000 {'davis': {'fmeasure': 0.8705511507216693, 'mae': 0.025285929420594357}}
-# MSRA10K + DAVIS finetune + GRU(motion plus) resize:473*473 snap:10000 {'davis': {'fmeasure': 0.8751665969557691, 'mae': 0.025608321628632937}}
+# MSRA10K + DAVIS resize:473*473 model: model priro recurrent snap:30000 {'davis': {'mae': 0.02533309706615563, 'fmeasure': 0.8745875295714605}}

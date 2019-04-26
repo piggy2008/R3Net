@@ -41,13 +41,13 @@ class R3Net_prior(nn.Module):
             #                          return_all_layers=False)
 
             self.reduce_high_motion = ConvGRU(input_size=(119, 119), input_dim=256,
-                                          hidden_dim=256,
+                                          hidden_dim=32,
                                           kernel_size=(3, 3),
                                           num_layers=1,
                                           batch_first=True,
                                           bias=True,
                                           return_all_layers=False)
-            self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
+            # self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         elif self.motion == 'LSTM':
             # self.reduce_low_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
@@ -61,7 +61,7 @@ class R3Net_prior(nn.Module):
             #                               return_all_layers=False)
 
             self.reduce_high_motion = ConvLSTM(input_size=(119, 119), input_dim=256,
-                                           hidden_dim=256,
+                                           hidden_dim=32,
                                            kernel_size=(3, 3),
                                            num_layers=1,
                                            padding=1,
@@ -69,7 +69,7 @@ class R3Net_prior(nn.Module):
                                            batch_first=True,
                                            bias=True,
                                            return_all_layers=False)
-            self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
+            # self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -104,24 +104,24 @@ class R3Net_prior(nn.Module):
         )
 
         self.predict1_motion = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
+            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
         self.predict2_motion = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
+            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
         self.predict3_motion = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
+            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
         self.predict4_motion = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
+            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
 
         for m in self.modules():
@@ -150,12 +150,8 @@ class R3Net_prior(nn.Module):
             # reduce_low = low_side[0].squeeze(0)
             high_side, high_state = self.reduce_high_motion(reduce_high.unsqueeze(0))
             high_motion = high_side[0].squeeze(0)
-            motion_predict = self.motion_predict(high_motion)
-            predict0 = self.predict0(reduce_high) + motion_predict
-        else:
-            predict0 = self.predict0(reduce_high)
 
-
+        predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
         predict2 = self.predict2(torch.cat((predict1, reduce_high), 1)) + predict1
         predict3 = self.predict3(torch.cat((predict2, reduce_low), 1)) + predict2
@@ -164,23 +160,23 @@ class R3Net_prior(nn.Module):
         predict6 = self.predict6(torch.cat((predict5, reduce_high), 1)) + predict5
 
         first_sal = predict6.narrow(0, 0, 1)
-        first_reduce_high = reduce_high.narrow(0, 1, 4)
+        first_reduce_high = high_motion.narrow(0, 1, 4)
         first_sal = torch.cat([first_sal, first_sal, first_sal, first_sal], dim=0)
-        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high], 1))
+        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high], 1)) + predict6.narrow(0, 1, 4)
 
         second_sal = predict1_motion.narrow(0, 0, 1)
-        second_reduce_high = reduce_high.narrow(0, 2, 3)
+        second_reduce_high = high_motion.narrow(0, 2, 3)
         second_sal = torch.cat([second_sal, second_sal, second_sal], dim=0)
-        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high], 1))
+        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high], 1)) + predict1_motion.narrow(0, 1, 3)
 
         third_sal = predict2_motion.narrow(0, 0, 1)
-        third_reduce_high = reduce_high.narrow(0, 3, 2)
+        third_reduce_high = high_motion.narrow(0, 3, 2)
         third_sal = torch.cat([third_sal, third_sal], dim=0)
-        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high], 1))
+        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high], 1)) + predict2_motion.narrow(0, 1, 2)
 
         fourth_sal = predict3_motion.narrow(0, 0, 1)
-        fourth_reduce_high = reduce_high.narrow(0, 4, 1)
-        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high], 1))
+        fourth_reduce_high = high_motion.narrow(0, 4, 1)
+        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high], 1)) + predict3_motion.narrow(0, 1, 1)
 
         predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1_motion = F.upsample(predict1_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
@@ -228,6 +224,6 @@ class _ASPP(nn.Module):
         return self.fuse(torch.cat((conv1, conv2, conv3, conv4, conv5), 1))
 
 if __name__ == '__main__':
-    net = R3Net_prior(motion='')
-    input = torch.zeros([5, 3, 473, 473])
+    net = R3Net_prior(motion='GRU').cuda()
+    input = torch.zeros([5, 3, 200, 200]).cuda()
     output = net(input)

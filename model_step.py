@@ -21,26 +21,18 @@ class R3Net(nn.Module):
         self.layer3 = resnext.layer3
         self.layer4 = resnext.layer4
 
-        self.reduce_low = nn.Sequential(
-            nn.Conv2d(64 + 256 + 512, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
-            nn.Conv2d(256, 256, kernel_size=1), nn.BatchNorm2d(256), nn.PReLU()
-        )
+        # self.reduce_low = nn.Sequential(
+        #     nn.Conv2d(64 + 256 + 512, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
+        #     nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
+        #     nn.Conv2d(256, 256, kernel_size=1), nn.BatchNorm2d(256), nn.PReLU()
+        # )
         self.reduce_high = nn.Sequential(
             nn.Conv2d(1024 + 2048, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
             nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
             _ASPP(256)
         )
         if self.motion == 'GRU':
-            # self.reduce_low_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
-            #                          hidden_dim=256,
-            #                          kernel_size=(3, 3),
-            #                          num_layers=1,
-            #                          batch_first=True,
-            #                          bias=True,
-            #                          return_all_layers=False)
-
-            self.reduce_high_GRU = ConvGRU(input_size=(119, 119), input_dim=256,
+            self.reduce_high_motion = ConvGRU(input_size=(119, 119), input_dim=256,
                                           hidden_dim=256,
                                           kernel_size=(3, 3),
                                           num_layers=1,
@@ -48,19 +40,8 @@ class R3Net(nn.Module):
                                           bias=True,
                                           return_all_layers=False)
             self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
-
         elif self.motion == 'LSTM':
-            # self.reduce_low_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
-            #                               hidden_dim=256,
-            #                               kernel_size=(3, 3),
-            #                               num_layers=1,
-            #                               padding=1,
-            #                               dilation=1,
-            #                               batch_first=True,
-            #                               bias=True,
-            #                               return_all_layers=False)
-
-            self.reduce_high_GRU = ConvLSTM(input_size=(119, 119), input_dim=256,
+            self.reduce_high_motion = ConvLSTM(input_size=(119, 119), input_dim=256,
                                            hidden_dim=256,
                                            kernel_size=(3, 3),
                                            num_layers=1,
@@ -72,36 +53,7 @@ class R3Net(nn.Module):
             self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
-        self.predict1 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
-        self.predict2 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
-        self.predict3 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
-        self.predict4 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
-        self.predict5 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
-        self.predict6 = nn.Sequential(
-            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-            nn.Conv2d(128, 1, kernel_size=1)
-        )
+
         for m in self.modules():
             if isinstance(m, nn.ReLU) or isinstance(m, nn.Dropout):
                 m.inplace = True
@@ -114,10 +66,6 @@ class R3Net(nn.Module):
         layer4 = self.layer4(layer3)
 
         l0_size = layer0.size()[2:]
-        reduce_low = self.reduce_low(torch.cat((
-            layer0,
-            F.upsample(layer1, size=l0_size, mode='bilinear', align_corners=True),
-            F.upsample(layer2, size=l0_size, mode='bilinear', align_corners=True)), 1))
         reduce_high = self.reduce_high(torch.cat((
             layer3,
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
@@ -126,31 +74,19 @@ class R3Net(nn.Module):
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
             # reduce_low = low_side[0].squeeze(0)
-            high_side, high_state = self.reduce_high_GRU(reduce_high.unsqueeze(0))
+            high_side, high_state = self.reduce_high_motion(reduce_high.unsqueeze(0))
             high_motion = high_side[0].squeeze(0)
             motion_predict = self.motion_predict(high_motion)
             predict0 = self.predict0(reduce_high) + motion_predict
         else:
             predict0 = self.predict0(reduce_high)
 
-        predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
-        predict2 = self.predict2(torch.cat((predict1, reduce_high), 1)) + predict1
-        predict3 = self.predict3(torch.cat((predict2, reduce_low), 1)) + predict2
-        predict4 = self.predict4(torch.cat((predict3, reduce_high), 1)) + predict3
-        predict5 = self.predict5(torch.cat((predict4, reduce_low), 1)) + predict4
-        predict6 = self.predict6(torch.cat((predict5, reduce_high), 1)) + predict5
-
         predict0 = F.upsample(predict0, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict1 = F.upsample(predict1, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict2 = F.upsample(predict2, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict3 = F.upsample(predict3, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict4 = F.upsample(predict4, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict5 = F.upsample(predict5, size=x.size()[2:], mode='bilinear', align_corners=True)
-        predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
+        motion_predict = F.upsample(motion_predict, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         if self.training:
-            return predict0, predict1, predict2, predict3, predict4, predict5, predict6
-        return F.sigmoid(predict6)
+            return predict0, motion_predict
+        return F.sigmoid(predict0)
 
 
 class _ASPP(nn.Module):

@@ -32,7 +32,7 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 6,
     'last_iter': 0,
-    'lr': 1e-6,
+    'lr': 1e-3,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,

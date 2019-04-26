@@ -27,7 +27,7 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
-    'motion': '',
+    'motion': 'GRU',
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,

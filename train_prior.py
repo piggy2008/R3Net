@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 1
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -28,19 +28,19 @@ exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
     'motion': 'GRU',
-    'iter_num': 20000,
-    'iter_save': 10000,
+    'iter_num': 10000,
+    'iter_save': 5000,
     'train_batch_size': 1,
     'last_iter': 0,
     'lr': 1e-12,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
-    'momentum': 0.9,
+    'momentum': 0.95,
     'snapshot': '',
     'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-26 18:24:48', '30000.pth'),
     # 'pretrain': '',
     # 'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
-    'imgs_file': 'video_saliency/train_all_DAFB2_seq_5f.txt',
+    'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     # 'train_loader': 'video_image'
     'train_loader': 'video_sequence'
 }
@@ -71,7 +71,7 @@ else:
     ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=False)
 
 criterion = nn.BCEWithLogitsLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -91,19 +91,12 @@ def main():
     net = R3Net_prior(motion=args['motion']).cuda().train()
 
     # fix_parameters(net.named_parameters())
-    # optimizer = optim.SGD([
-    #     {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
-    #      'lr': 2 * args['lr']},
-    #     {'params': [param for name, param in net.named_parameters() if name[-4:] != 'bias'],
-    #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
-    # ], momentum=args['momentum'])
-
-    optimizer = optim.Adam([
+    optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},
         {'params': [param for name, param in net.named_parameters() if name[-4:] != 'bias'],
          'lr': args['lr'], 'weight_decay': args['weight_decay']}
-    ])
+    ], momentum=args['momentum'])
 
     if len(args['snapshot']) > 0:
         print('training resumes from ' + args['snapshot'])

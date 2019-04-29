@@ -104,24 +104,24 @@ class R3Net_prior(nn.Module):
         )
 
         self.predict1_motion = nn.Sequential(
-            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict2_motion = nn.Sequential(
-            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict3_motion = nn.Sequential(
-            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict4_motion = nn.Sequential(
-            nn.Conv2d(33, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(16), nn.PReLU(),
-            nn.Conv2d(16, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
 
         for m in self.modules():
@@ -161,22 +161,29 @@ class R3Net_prior(nn.Module):
 
         first_sal = predict6.narrow(0, 0, 1)
         first_reduce_high = high_motion.narrow(0, 1, 4)
+        first_motion = high_motion.narrow(0, 0, 1)
         first_sal = torch.cat([first_sal, first_sal, first_sal, first_sal], dim=0)
-        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high], 1)) + predict6.narrow(0, 1, 4)
+        first_motion = torch.cat([first_motion, first_motion, first_motion, first_motion], dim=0)
+        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high, first_motion], 1)) + predict6.narrow(0, 1, 4)
 
         second_sal = predict1_motion.narrow(0, 0, 1)
         second_reduce_high = high_motion.narrow(0, 2, 3)
+        second_motion = high_motion.narrow(0, 1, 1)
         second_sal = torch.cat([second_sal, second_sal, second_sal], dim=0)
-        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high], 1)) + predict1_motion.narrow(0, 1, 3)
+        second_motion = torch.cat([second_motion, second_motion, second_motion], dim=0)
+        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high, second_motion], 1)) + predict1_motion.narrow(0, 1, 3)
 
         third_sal = predict2_motion.narrow(0, 0, 1)
         third_reduce_high = high_motion.narrow(0, 3, 2)
+        third_motion = high_motion.narrow(0, 2, 1)
         third_sal = torch.cat([third_sal, third_sal], dim=0)
-        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high], 1)) + predict2_motion.narrow(0, 1, 2)
+        third_motion = torch.cat([third_motion, third_motion], dim=0)
+        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high, third_motion], 1)) + predict2_motion.narrow(0, 1, 2)
 
         fourth_sal = predict3_motion.narrow(0, 0, 1)
         fourth_reduce_high = high_motion.narrow(0, 4, 1)
-        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high], 1)) + predict3_motion.narrow(0, 1, 1)
+        fourth_motion = high_motion.narrow(0, 3, 1)
+        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high, fourth_motion], 1)) + predict3_motion.narrow(0, 1, 1)
 
         predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1_motion = F.upsample(predict1_motion, size=x.size()[2:], mode='bilinear', align_corners=True)

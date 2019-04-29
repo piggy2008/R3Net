@@ -14,6 +14,23 @@ class Compose(object):
             img, mask = t(img, mask)
         return img, mask
 
+class ImageResize(object):
+
+    def __init__(self, size):
+        if isinstance(size, numbers.Number):
+            self.size = (int(size), int(size))
+        else:
+            self.size = size
+
+    def __call__(self, img, mask):
+        if isinstance(img, list) & isinstance(mask, list):
+            img_resized = []
+            mask_resized = []
+            for img_s, mask_s in zip(img, mask):
+                tw, th = self.size
+                img_resized.append(img_s.resize((tw, th), Image.BILINEAR))
+                mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
+            return img_resized, mask_resized
 
 class RandomCrop(object):
     def __init__(self, size, padding=0):

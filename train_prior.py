@@ -32,7 +32,7 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 1,
     'last_iter': 0,
-    'lr': 1e-10,
+    'lr': 1e-12,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
@@ -48,11 +48,6 @@ args = {
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
-joint_transform = joint_transforms.Compose([
-    joint_transforms.RandomCrop(473),
-    joint_transforms.RandomHorizontallyFlip(),
-    joint_transforms.RandomRotate(10)
-])
 img_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -61,8 +56,19 @@ target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
 if args['train_loader'] == 'video_sequence':
+    joint_transform = joint_transforms.Compose([
+        joint_transforms.ImageResize(550),
+        joint_transforms.RandomCrop(473),
+        joint_transforms.RandomHorizontallyFlip(),
+        joint_transforms.RandomRotate(10)
+    ])
     train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
 else:
+    joint_transform = joint_transforms.Compose([
+        joint_transforms.RandomCrop(473),
+        joint_transforms.RandomHorizontallyFlip(),
+        joint_transforms.RandomRotate(10)
+    ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)

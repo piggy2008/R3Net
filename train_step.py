@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -30,7 +30,7 @@ args = {
     'motion': 'GRU',
     'iter_num': 30000,
     'iter_save': 10000,
-    'train_batch_size': 8,
+    'train_batch_size': 4,
     'last_iter': 0,
     'lr': 1e-3,
     'lr_decay': 0.9,
@@ -113,6 +113,7 @@ def train(net, optimizer):
     curr_iter = args['last_iter']
     while True:
         total_loss_record, loss0_record, loss1_record = AvgMeter(), AvgMeter(), AvgMeter()
+        loss2_record = AvgMeter()
         # loss2_record, loss3_record, loss4_record = AvgMeter(), AvgMeter(), AvgMeter()
 
         for i, data in enumerate(train_loader):
@@ -129,32 +130,35 @@ def train(net, optimizer):
             labels = Variable(labels).cuda()
 
             optimizer.zero_grad()
-            outputs0, outputs1 = net(inputs)
+            outputs0, outputs1, outputs2 = net(inputs)
             loss0 = criterion(outputs0, labels)
             loss1 = criterion(outputs1, labels)
+            loss2 = criterion(outputs2, labels)
 
-            total_loss = loss0 + loss1
+            total_loss = loss0 + loss1 + loss2
             total_loss.backward()
             optimizer.step()
 
             total_loss_record.update(total_loss.data, batch_size)
             loss0_record.update(loss0.data, batch_size)
             loss1_record.update(loss1.data, batch_size)
+            loss2_record.update(loss2.data, batch_size)
 
             curr_iter += 1
 
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [lr %.13f]' % \
-                  (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, optimizer.param_groups[1]['lr'])
+            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [lr %.13f]' % \
+                  (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, loss2_record.avg, optimizer.param_groups[1]['lr'])
             print (log)
             open(log_path, 'a').write(log + '\n')
 
             if curr_iter % args['iter_save'] == 0:
-                print('taking snapshot ...')
+                print('taking snapshot ...', ckpt_path)
                 torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
                 torch.save(optimizer.state_dict(),
                            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
 
             if curr_iter == args['iter_num']:
+                print('taking snapshot ...', ckpt_path)
                 torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
                 torch.save(optimizer.state_dict(),
                            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))

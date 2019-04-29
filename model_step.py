@@ -21,11 +21,11 @@ class R3Net(nn.Module):
         self.layer3 = resnext.layer3
         self.layer4 = resnext.layer4
 
-        # self.reduce_low = nn.Sequential(
-        #     nn.Conv2d(64 + 256 + 512, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
-        #     nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
-        #     nn.Conv2d(256, 256, kernel_size=1), nn.BatchNorm2d(256), nn.PReLU()
-        # )
+        self.reduce_low = nn.Sequential(
+            nn.Conv2d(64 + 256 + 512, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
+            nn.Conv2d(256, 256, kernel_size=1), nn.BatchNorm2d(256), nn.PReLU()
+        )
         self.reduce_high = nn.Sequential(
             nn.Conv2d(1024 + 2048, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
             nn.Conv2d(256, 256, kernel_size=3, padding=1), nn.BatchNorm2d(256), nn.PReLU(),
@@ -53,6 +53,11 @@ class R3Net(nn.Module):
             self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
+        self.predict1 = nn.Sequential(
+            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+            nn.Conv2d(128, 1, kernel_size=1)
+        )
 
         for m in self.modules():
             if isinstance(m, nn.ReLU) or isinstance(m, nn.Dropout):
@@ -66,6 +71,12 @@ class R3Net(nn.Module):
         layer4 = self.layer4(layer3)
 
         l0_size = layer0.size()[2:]
+
+        reduce_low = self.reduce_low(torch.cat((
+            layer0,
+            F.upsample(layer1, size=l0_size, mode='bilinear', align_corners=True),
+            F.upsample(layer2, size=l0_size, mode='bilinear', align_corners=True)), 1))
+
         reduce_high = self.reduce_high(torch.cat((
             layer3,
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
@@ -77,16 +88,18 @@ class R3Net(nn.Module):
             high_side, high_state = self.reduce_high_motion(reduce_high.unsqueeze(0))
             high_motion = high_side[0].squeeze(0)
             motion_predict = self.motion_predict(high_motion)
-            predict0 = self.predict0(reduce_high) + motion_predict
-        else:
-            predict0 = self.predict0(reduce_high)
+            # predict0 = self.predict0(reduce_high) + motion_predict
+
+        predict0 = self.predict0(reduce_high)
+        predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0 + motion_predict
 
         predict0 = F.upsample(predict0, size=x.size()[2:], mode='bilinear', align_corners=True)
+        predict1 = F.upsample(predict1, size=x.size()[2:], mode='bilinear', align_corners=True)
         motion_predict = F.upsample(motion_predict, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         if self.training:
-            return predict0, motion_predict
-        return F.sigmoid(predict0)
+            return predict0, predict1, motion_predict
+        return F.sigmoid(predict1)
 
 
 class _ASPP(nn.Module):

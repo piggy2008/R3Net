@@ -91,12 +91,19 @@ def main():
     net = R3Net_prior(motion=args['motion']).cuda().train()
 
     # fix_parameters(net.named_parameters())
-    optimizer = optim.SGD([
+    # optimizer = optim.SGD([
+    #     {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
+    #      'lr': 2 * args['lr']},
+    #     {'params': [param for name, param in net.named_parameters() if name[-4:] != 'bias'],
+    #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
+    # ], momentum=args['momentum'])
+
+    optimizer = optim.Adam([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},
         {'params': [param for name, param in net.named_parameters() if name[-4:] != 'bias'],
          'lr': args['lr'], 'weight_decay': args['weight_decay']}
-    ], momentum=args['momentum'])
+    ])
 
     if len(args['snapshot']) > 0:
         print('training resumes from ' + args['snapshot'])

@@ -104,24 +104,24 @@ class R3Net_prior(nn.Module):
         )
 
         self.predict1_motion = nn.Sequential(
-            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(33 + 32, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
             nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict2_motion = nn.Sequential(
-            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
         self.predict3_motion = nn.Sequential(
-            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
         self.predict4_motion = nn.Sequential(
-            nn.Conv2d(33 + 32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(33 + 32, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(16, 1, kernel_size=1)
         )
 
         for m in self.modules():

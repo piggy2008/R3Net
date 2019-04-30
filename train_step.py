@@ -123,8 +123,9 @@ def train(net, optimizer):
                                                             ) ** args['lr_decay']
 
             inputs, labels = data
-            inputs = inputs.squeeze(0)
-            labels = labels.squeeze(0)
+            if args['train_loader'] == 'video_sequence':
+                inputs = inputs.squeeze(0)
+                labels = labels.squeeze(0)
             batch_size = inputs.size(0)
             inputs = Variable(inputs).cuda()
             labels = Variable(labels).cuda()

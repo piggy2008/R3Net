@@ -33,7 +33,7 @@ args = {
     'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-7,
-    'lr_decay': 0.9,
+    'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',

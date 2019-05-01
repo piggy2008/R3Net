@@ -95,10 +95,10 @@ class R3Net(nn.Module):
 
         predict0 = F.upsample(predict0, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1 = F.upsample(predict1, size=x.size()[2:], mode='bilinear', align_corners=True)
-        motion_predict = F.upsample(motion_predict, size=x.size()[2:], mode='bilinear', align_corners=True)
+        # motion_predict = F.upsample(motion_predict, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         if self.training:
-            return predict0, predict1, motion_predict
+            return predict0, predict1
         return F.sigmoid(predict1)
 
 

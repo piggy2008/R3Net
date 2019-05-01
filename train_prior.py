@@ -71,7 +71,7 @@ else:
     ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=False)
+train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)
 
 criterion = nn.BCEWithLogitsLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')

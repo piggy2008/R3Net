@@ -82,7 +82,7 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = R3Net(motion=args['motion']).cuda().train()
+    net = R3Net(motion=args['']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

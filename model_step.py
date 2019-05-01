@@ -91,7 +91,7 @@ class R3Net(nn.Module):
             # predict0 = self.predict0(reduce_high) + motion_predict
 
         predict0 = self.predict0(reduce_high)
-        predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0 + motion_predict
+        predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
 
         predict0 = F.upsample(predict0, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1 = F.upsample(predict1, size=x.size()[2:], mode='bilinear', align_corners=True)

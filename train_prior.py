@@ -90,7 +90,7 @@ def fix_parameters(parameters):
 def main():
     net = R3Net_prior(motion=args['motion']).cuda().train()
 
-    # fix_parameters(net.named_parameters())
+    fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

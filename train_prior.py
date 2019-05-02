@@ -35,12 +35,12 @@ args = {
     'lr': 1e-6,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
-    'momentum': 0.9,
+    'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-01 23:29:39', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
-    # 'imgs_file': 'video_saliency/train_all_DAFB3_THUR_seq_5f.txt',
+    # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     'train_loader': 'video_image'
     # 'train_loader': 'video_sequence'
 }
@@ -65,13 +65,14 @@ if args['train_loader'] == 'video_sequence':
     train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
 else:
     joint_transform = joint_transforms.Compose([
+        # joint_transforms.ImageResize(473),
         joint_transforms.RandomCrop(473),
         joint_transforms.RandomHorizontallyFlip(),
         joint_transforms.RandomRotate(10)
     ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=False)
 
 criterion = nn.BCEWithLogitsLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -90,7 +91,7 @@ def fix_parameters(parameters):
 def main():
     net = R3Net_prior(motion=args['motion']).cuda().train()
 
-    # fix_parameters(net.named_parameters())
+    fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

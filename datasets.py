@@ -43,6 +43,7 @@ class VideoImageFolder(data.Dataset):
     def __init__(self, root, imgs_file, joint_transform=None, transform=None, target_transform=None):
         self.root = root
         self.imgs = [i_id.strip() for i_id in open(imgs_file)]
+        self.imgs.sort()
         self.joint_transform = joint_transform
         self.transform = transform
         self.target_transform = target_transform
@@ -104,8 +105,9 @@ if __name__ == '__main__':
     import joint_transforms
     from torch.utils.data import DataLoader
     from config import msra10k_path, video_seq_path, video_seq_gt_path, video_train_path
-
+    import numpy as np
     joint_transform = joint_transforms.Compose([
+        joint_transforms.ImageResize(550),
         joint_transforms.RandomCrop(473),
         joint_transforms.RandomHorizontallyFlip(),
         joint_transforms.RandomRotate(10)
@@ -116,18 +118,20 @@ if __name__ == '__main__':
     ])
     target_transform = transforms.ToTensor()
 
-    # imgs_file = '/home/qub/data/saliency/video_saliency/train_all_DAFB2_seq_4f_step_all.txt'
+    # imgs_file = '/home/qub/data/saliency/video_saliency/train_all_THUR_seq_5f (copy).txt'
     # train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
     imgs_file = '/home/qub/data/saliency/Pre-train/pretrain_all_seq2.txt'
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
-    train_loader = DataLoader(train_set, batch_size=4, num_workers=12, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=5, num_workers=12, shuffle=False)
 
     for i, data in enumerate(train_loader):
         input, target = data
         input = input.data.cpu().numpy()
         target = target.data.cpu().numpy()
-        for i in range(0, input.shape[0]):
-            plt.subplot(2, 2, i + 1)
-            # target = target.transpose(0, 2, 3, 1)
-            plt.imshow(target[i, 0])
-        plt.show()
+        # np.savetxt('image.txt', input[0, 0, :, :])
+        # input = input.transpose(0, 2, 3, 1)
+        # for i in range(0, input.shape[0]):
+        #     plt.subplot(2, 3, i + 1)
+        #     plt.imshow(input[i])
+        # plt.show()
+        # print(input.shape)

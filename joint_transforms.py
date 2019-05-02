@@ -23,7 +23,7 @@ class ImageResize(object):
             self.size = size
 
     def __call__(self, img, mask):
-        if isinstance(img, list) & isinstance(mask, list):
+        if isinstance(img, list) and isinstance(mask, list):
             img_resized = []
             mask_resized = []
             for img_s, mask_s in zip(img, mask):
@@ -31,6 +31,10 @@ class ImageResize(object):
                 img_resized.append(img_s.resize((tw, th), Image.BILINEAR))
                 mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
             return img_resized, mask_resized
+        else:
+            tw, th = self.size
+            return img.resize((tw, th), Image.BILINEAR), mask.resize((tw, th), Image.NEAREST)
+
 
 class RandomCrop(object):
     def __init__(self, size, padding=0):
@@ -41,7 +45,7 @@ class RandomCrop(object):
         self.padding = padding
 
     def __call__(self, img, mask):
-        if isinstance(img, list) & isinstance(mask, list):
+        if isinstance(img, list) and isinstance(mask, list):
             imgs_crop = []
             masks_crop = []
             img_first = True
@@ -53,8 +57,7 @@ class RandomCrop(object):
                 assert img_s.size == mask_s.size
                 w, h = img_s.size
                 th, tw = self.size
-                if w == tw and h == th:
-                    return img, mask
+
                 if w < tw or h < th:
                     imgs_crop.append(img_s.resize((tw, th), Image.BILINEAR))
                     masks_crop.append(mask_s.resize((tw, th), Image.NEAREST))

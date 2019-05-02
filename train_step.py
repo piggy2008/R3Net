@@ -30,7 +30,7 @@ args = {
     'motion': '',
     'iter_num': 30000,
     'iter_save': 10000,
-    'train_batch_size': 8,
+    'train_batch_size': 7,
     'last_iter': 0,
     'lr': 1e-3,
     'lr_decay': 0.9,

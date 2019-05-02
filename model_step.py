@@ -69,6 +69,12 @@ class R3Net(nn.Module):
             nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
             nn.Conv2d(128, 1, kernel_size=1)
         )
+
+        self.predict4 = nn.Sequential(
+            nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+            nn.Conv2d(128, 1, kernel_size=1)
+        )
         for m in self.modules():
             if isinstance(m, nn.ReLU) or isinstance(m, nn.Dropout):
                 m.inplace = True
@@ -104,17 +110,19 @@ class R3Net(nn.Module):
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
         predict2 = self.predict2(torch.cat((predict1, reduce_high), 1)) + predict1
         predict3 = self.predict3(torch.cat((predict2, reduce_low), 1)) + predict2
+        predict4 = self.predict3(torch.cat((predict3, reduce_high), 1)) + predict3
 
         predict0 = F.upsample(predict0, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1 = F.upsample(predict1, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict2 = F.upsample(predict2, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict3 = F.upsample(predict3, size=x.size()[2:], mode='bilinear', align_corners=True)
+        predict4 = F.upsample(predict4, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         # motion_predict = F.upsample(motion_predict, size=x.size()[2:], mode='bilinear', align_corners=True)
 
         if self.training:
-            return predict0, predict1, predict2, predict3
-        return F.sigmoid(predict3)
+            return predict0, predict1, predict2, predict3, predict4
+        return F.sigmoid(predict4)
 
 
 class _ASPP(nn.Module):

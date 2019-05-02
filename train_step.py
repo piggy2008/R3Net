@@ -113,7 +113,7 @@ def train(net, optimizer):
     curr_iter = args['last_iter']
     while True:
         total_loss_record, loss0_record, loss1_record = AvgMeter(), AvgMeter(), AvgMeter()
-        # loss2_record = AvgMeter()
+        loss2_record, loss3_record = AvgMeter(), AvgMeter()
         # loss2_record, loss3_record, loss4_record = AvgMeter(), AvgMeter(), AvgMeter()
 
         for i, data in enumerate(train_loader):
@@ -131,24 +131,27 @@ def train(net, optimizer):
             labels = Variable(labels).cuda()
 
             optimizer.zero_grad()
-            outputs0, outputs1 = net(inputs)
+            outputs0, outputs1, outputs2, outputs3 = net(inputs)
             loss0 = criterion(outputs0, labels)
             loss1 = criterion(outputs1, labels)
-            # loss2 = criterion(outputs2, labels)
+            loss2 = criterion(outputs2, labels)
+            loss3 = criterion(outputs3, labels)
 
-            total_loss = loss0 + loss1
+            total_loss = loss0 + loss1 + loss2 + loss3
             total_loss.backward()
             optimizer.step()
 
             total_loss_record.update(total_loss.data, batch_size)
             loss0_record.update(loss0.data, batch_size)
             loss1_record.update(loss1.data, batch_size)
-            # loss2_record.update(loss2.data, batch_size)
+            loss2_record.update(loss2.data, batch_size)
+            loss3_record.update(loss3.data, batch_size)
 
             curr_iter += 1
 
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [lr %.13f]' % \
-                  (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, optimizer.param_groups[1]['lr'])
+            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], [lr %.13f]' % \
+                  (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg,
+                   loss2_record.avg, loss3_record.avg, optimizer.param_groups[1]['lr'])
             print (log)
             open(log_path, 'a').write(log + '\n')
 

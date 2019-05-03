@@ -113,7 +113,7 @@ def train(net, optimizer):
     curr_iter = args['last_iter']
     while True:
         total_loss_record, loss0_record, loss1_record = AvgMeter(), AvgMeter(), AvgMeter()
-        loss2_record, loss3_record , loss4_record = AvgMeter(), AvgMeter(), AvgMeter()
+        loss2_record, loss3_record, loss4_record, loss5_record = AvgMeter(), AvgMeter(), AvgMeter(), AvgMeter()
         # loss2_record, loss3_record, loss4_record = AvgMeter(), AvgMeter(), AvgMeter()
 
         for i, data in enumerate(train_loader):
@@ -131,14 +131,15 @@ def train(net, optimizer):
             labels = Variable(labels).cuda()
 
             optimizer.zero_grad()
-            outputs0, outputs1, outputs2, outputs3, outputs4 = net(inputs)
+            outputs0, outputs1, outputs2, outputs3, outputs4, outputs5 = net(inputs)
             loss0 = criterion(outputs0, labels)
             loss1 = criterion(outputs1, labels)
             loss2 = criterion(outputs2, labels)
             loss3 = criterion(outputs3, labels)
             loss4 = criterion(outputs4, labels)
+            loss5 = criterion(outputs5, labels)
 
-            total_loss = loss0 + loss1 + loss2 + loss3 + loss4
+            total_loss = loss0 + loss1 + loss2 + loss3 + loss4 + loss5
             total_loss.backward()
             optimizer.step()
 
@@ -148,12 +149,13 @@ def train(net, optimizer):
             loss2_record.update(loss2.data, batch_size)
             loss3_record.update(loss3.data, batch_size)
             loss4_record.update(loss4.data, batch_size)
+            loss5_record.update(loss5.data, batch_size)
 
             curr_iter += 1
 
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], [loss4 %.5f], [lr %.13f]' % \
+            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], [loss4 %.5f], [loss4 %.5f], [lr %.13f]' % \
                   (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg,
-                   loss2_record.avg, loss3_record.avg, loss4_record.avg, optimizer.param_groups[1]['lr'])
+                   loss2_record.avg, loss3_record.avg, loss4_record.avg, loss5_record.avg, optimizer.param_groups[1]['lr'])
             print (log)
             open(log_path, 'a').write(log + '\n')
 

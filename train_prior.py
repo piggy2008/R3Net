@@ -35,7 +35,7 @@ args = {
     'lr': 1e-6,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
-    'momentum': 0.9,
+    'momentum': 0.95,
     'snapshot': '',
     'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-01 23:29:39', '30000.pth'),
     # 'pretrain': '',

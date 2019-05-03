@@ -25,7 +25,7 @@ torch.cuda.set_device(device_id)
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
-
+# VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
     'motion': 'GRU',
     'iter_num': 30000,

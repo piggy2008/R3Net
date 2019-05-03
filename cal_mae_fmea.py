@@ -45,8 +45,16 @@ results[name] = {'fmeasure': fmeasure, 'mae': mae_record.avg}
 print ('test results:')
 print (results)
 
-# MSRA10K + DAVIS snap:10000 {'davis': {'mae': 0.03617724595417807, 'fmeasure': 0.8150494537915058}}
-# MSRA10K + DAVIS(input no mea & std) snap:30000 {'davis': {'mae': 0.03403602471853535}, 'fmeasure': 0.8208723312824877}
-# MSRA10K + DAVIS snap:30000 {'davis': {'mae': 0.02795341027164935}, 'fmeasure': 0.846696146351338}
-# MSRA10K + DAVIS resize:473*473 snap:30000 {'davis': 'mae': 0.02464488739008121, ''fmeasure': 0.8753527027151914}
-# MSRA10K + DAVIS resize:473*473 model: model priro recurrent snap:30000 {'davis': {'mae': 0.02533309706615563, 'fmeasure': 0.8745875295714605}}
+# THUR15K + DAVIS snap:10000 {'davis': {'mae': 0.03617724595417807, 'fmeasure': 0.8150494537915058}}
+# THUR15K + DAVIS(input no mea & std) snap:30000 {'davis': {'mae': 0.03403602471853535}, 'fmeasure': 0.8208723312824877}
+# THUR15K + DAVIS snap:30000 {'davis': {'mae': 0.02795341027164935}, 'fmeasure': 0.846696146351338}
+# THUR15K + DAVIS resize:473*473 snap:30000 {'davis': 'mae': 0.02464488739008121, ''fmeasure': 0.8753527027151914}
+# THUR15K + DAVIS resize:473*473 model:R1 high and low, snap:30000 {'davis': {'fmeasure': 0.8657611483587979, 'mae': 0.028688147260396805}}
+# THUR15K + DAVIS resize:473*473 model: model prior recurrent snap:30000 {'davis': {'mae': 0.02533309706615563, 'fmeasure': 0.8745875295714605}}
+# THUR15K + DAVIS resize:473*473 model: model prior recurrent + feature maps plus
+# snap:30000 {'davis': {'fmeasure': 0.8751256401745396, 'mae': 0.025352599605078505}}
+
+# VideoSaliency_2019-05-03 00:54:21 is better, using model_prior, R3Net base and add previous frame supervision and recurrent GRU motion extraction
+# training details, first, directly train R3Net using DAFB2 and THUR15K, second, finetune the model by add recurrent module and GRU, then finetune twice
+# using DAFB2 and THUR15K but dataloader shuffle=false in order to have consecutive frames. The specific super parameter is in VideoSaliency_2019-05-03 00:54:21
+# VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth

@@ -234,3 +234,4 @@ if __name__ == '__main__':
     net = R3Net_prior(motion='GRU').cuda()
     input = torch.zeros([5, 3, 200, 200]).cuda()
     output = net(input)
+    # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth

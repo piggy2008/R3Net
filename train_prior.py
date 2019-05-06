@@ -28,6 +28,7 @@ exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
     'motion': 'GRU',
+    'se_layer': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -90,7 +91,7 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = R3Net_prior(motion=args['motion']).cuda().train()
+    net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer']).cuda().train()
 
     fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

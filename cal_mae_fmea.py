@@ -4,7 +4,7 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-04-20 23:11:17'
+exp_name = 'VideoSaliency_2019-05-04 01:31:33'
 name = 'davis'
 gt_root = '/home/qub/data/saliency/davis/GT'
 
@@ -58,3 +58,6 @@ print (results)
 # training details, first, directly train R3Net using DAFB2 and THUR15K, second, finetune the model by add recurrent module and GRU, then finetune twice
 # using DAFB2 and THUR15K but dataloader shuffle=false in order to have consecutive frames. The specific super parameter is in VideoSaliency_2019-05-03 00:54:21
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
+
+# VideoSaliency_2019-05-03 23:59:44: finetune model prior from 05-01 model, fix other layers excepet motion module
+# {'davis': {'mae': 0.031455319655690664, 'fmeasure': 0.8687384596915435}}

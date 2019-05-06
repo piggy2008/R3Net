@@ -81,7 +81,7 @@ log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.tx
 
 def fix_parameters(parameters):
     for name, parameter in parameters:
-        if name.find('motion') >= 0 \
+        if name.find('motion') >= 0 or name.find('reduce') >= 0 \
                 or name.find('GRU') >= 0 or name.find('predict') >= 0:
             print(name, 'is not fixed')
 

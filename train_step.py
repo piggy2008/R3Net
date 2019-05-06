@@ -153,7 +153,7 @@ def train(net, optimizer):
 
             curr_iter += 1
 
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], [loss4 %.5f], [loss4 %.5f], [lr %.13f]' % \
+            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], [loss4 %.5f], [loss5 %.5f], [lr %.13f]' % \
                   (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg,
                    loss2_record.avg, loss3_record.avg, loss4_record.avg, loss5_record.avg, optimizer.param_groups[1]['lr'])
             print (log)

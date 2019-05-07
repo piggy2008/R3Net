@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -27,7 +27,7 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
-    'motion': 'GRU',
+    'motion': 'LSTM',
     'se_layer': True,
     'iter_num': 30000,
     'iter_save': 10000,
@@ -36,15 +36,15 @@ args = {
     'lr': 1e-6,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
-    'momentum': 0.95,
+    'momentum': 0.9,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-01 23:29:39', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-20 23:11:17', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     'train_loader': 'video_image',
     # 'train_loader': 'video_sequence',
-    'shuffle': False
+    'shuffle': True
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
@@ -93,7 +93,7 @@ def fix_parameters(parameters):
 def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

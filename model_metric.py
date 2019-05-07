@@ -75,7 +75,7 @@ class R3Net_prior(nn.Module):
 
         if self.se_layer:
             self.reduce_high_se = SELayer(256)
-            # self.reduce_low_se = SELayer(256)
+            self.reduce_low_se = SELayer(256)
             self.motion_se = SELayer(32)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
@@ -153,7 +153,7 @@ class R3Net_prior(nn.Module):
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
 
         if self.se_layer:
-            # reduce_low = self.reduce_low_se(reduce_low)
+            reduce_low = self.reduce_low_se(reduce_low)
             reduce_high = self.reduce_high_se(reduce_high)
 
         if len(self.motion) > 0:

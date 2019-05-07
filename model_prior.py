@@ -74,7 +74,7 @@ class R3Net_prior(nn.Module):
             # self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
         if self.se_layer:
-            self.reduce_high_se = SELayer(256)
+            # self.reduce_high_se = SELayer(256)
             # self.reduce_low_se = SELayer(256)
             self.motion_se = SELayer(32)
 
@@ -152,9 +152,9 @@ class R3Net_prior(nn.Module):
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
 
-        if self.se_layer:
+        # if self.se_layer:
             # reduce_low = self.reduce_low_se(reduce_low)
-            reduce_high = self.reduce_high_se(reduce_high)
+            # reduce_high = self.reduce_high_se(reduce_high)
 
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
@@ -177,26 +177,27 @@ class R3Net_prior(nn.Module):
         first_motion = high_motion.split(1, dim=0)
         first_sal = torch.cat([first_sal, first_sal, first_sal, first_sal], dim=0)
         first_motion = torch.cat(first_motion[:-1], dim=0)
-        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high + first_motion], 1)) + predict6.narrow(0, 1, 4)
+        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high], 1)) + predict6.narrow(0, 1, 4)
+
 
         second_sal = predict1_motion.narrow(0, 0, 1)
         second_reduce_high = high_motion.narrow(0, 2, 3)
         second_motion = high_motion.split(1, dim=0)
         second_sal = torch.cat([second_sal, second_sal, second_sal], dim=0)
         second_motion = torch.cat(second_motion[1:-1], dim=0)
-        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high + second_motion], 1)) + predict1_motion.narrow(0, 1, 3)
+        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high], 1)) + predict1_motion.narrow(0, 1, 3)
 
         third_sal = predict2_motion.narrow(0, 0, 1)
         third_reduce_high = high_motion.narrow(0, 3, 2)
         third_motion = high_motion.split(1, dim=0)
         third_sal = torch.cat([third_sal, third_sal], dim=0)
         third_motion = torch.cat(third_motion[2:-1], dim=0)
-        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high + third_motion], 1)) + predict2_motion.narrow(0, 1, 2)
+        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high], 1)) + predict2_motion.narrow(0, 1, 2)
 
         fourth_sal = predict3_motion.narrow(0, 0, 1)
         fourth_reduce_high = high_motion.narrow(0, 4, 1)
         fourth_motion = high_motion.narrow(0, 3, 1)
-        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high + fourth_motion], 1)) + predict3_motion.narrow(0, 1, 1)
+        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high], 1)) + predict3_motion.narrow(0, 1, 1)
 
         predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1_motion = F.upsample(predict1_motion, size=x.size()[2:], mode='bilinear', align_corners=True)

@@ -5,16 +5,18 @@ from module.convGRU import ConvGRU
 from module.convLSTM import ConvLSTM
 from matplotlib import pyplot as plt
 from module.se_layer import SELayer
+from module.attention import BaseOC_Context_Module
 
 from resnext.resnext101 import ResNeXt101
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False):
+    def __init__(self, motion='GRU', se_layer=False, attention=False):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
         self.se_layer = se_layer
+        self.attention = attention
 
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
@@ -77,6 +79,9 @@ class R3Net_prior(nn.Module):
             self.reduce_high_se = SELayer(256)
             # self.reduce_low_se = SELayer(256)
             self.motion_se = SELayer(32)
+
+        if self.attention:
+            self.attention_motion = BaseOC_Context_Module(32, 32, 16, 16, dropout=0.05, sizes=([1]))
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -164,6 +169,9 @@ class R3Net_prior(nn.Module):
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
 
+            if self.attention:
+                high_motion = self.attention_motion(high_motion)
+
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0
         predict2 = self.predict2(torch.cat((predict1, reduce_high), 1)) + predict1
@@ -177,7 +185,7 @@ class R3Net_prior(nn.Module):
         first_motion = high_motion.split(1, dim=0)
         first_sal = torch.cat([first_sal, first_sal, first_sal, first_sal], dim=0)
         first_motion = torch.cat(first_motion[:-1], dim=0)
-        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high], 1)) + predict6.narrow(0, 1, 4)
+        predict1_motion = self.predict1_motion(torch.cat([first_sal, first_reduce_high + first_motion], 1)) + predict6.narrow(0, 1, 4)
 
 
         second_sal = predict1_motion.narrow(0, 0, 1)
@@ -185,19 +193,19 @@ class R3Net_prior(nn.Module):
         second_motion = high_motion.split(1, dim=0)
         second_sal = torch.cat([second_sal, second_sal, second_sal], dim=0)
         second_motion = torch.cat(second_motion[1:-1], dim=0)
-        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high], 1)) + predict1_motion.narrow(0, 1, 3)
+        predict2_motion = self.predict2_motion(torch.cat([second_sal, second_reduce_high + second_motion], 1)) + predict1_motion.narrow(0, 1, 3)
 
         third_sal = predict2_motion.narrow(0, 0, 1)
         third_reduce_high = high_motion.narrow(0, 3, 2)
         third_motion = high_motion.split(1, dim=0)
         third_sal = torch.cat([third_sal, third_sal], dim=0)
         third_motion = torch.cat(third_motion[2:-1], dim=0)
-        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high], 1)) + predict2_motion.narrow(0, 1, 2)
+        predict3_motion = self.predict3_motion(torch.cat([third_sal, third_reduce_high + third_motion], 1)) + predict2_motion.narrow(0, 1, 2)
 
         fourth_sal = predict3_motion.narrow(0, 0, 1)
         fourth_reduce_high = high_motion.narrow(0, 4, 1)
         fourth_motion = high_motion.narrow(0, 3, 1)
-        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high], 1)) + predict3_motion.narrow(0, 1, 1)
+        predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high + fourth_motion], 1)) + predict3_motion.narrow(0, 1, 1)
 
         predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1_motion = F.upsample(predict1_motion, size=x.size()[2:], mode='bilinear', align_corners=True)

@@ -27,8 +27,9 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
-    'motion': 'LSTM',
-    'se_layer': True,
+    'motion': 'GRU',
+    'se_layer': False,
+    'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -38,7 +39,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-07 19:45:23', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-01 23:29:39', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
@@ -91,7 +92,8 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer']).cuda().train()
+    net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
+                      attention=args['attention']).cuda().train()
 
     fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

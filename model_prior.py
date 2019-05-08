@@ -81,7 +81,7 @@ class R3Net_prior(nn.Module):
             self.motion_se = SELayer(32)
 
         if self.attention:
-            self.attention_motion = BaseOC_Context_Module(32, 32, 16, 16, dropout=0.05, sizes=([1]))
+            self.attention_motion = BaseOC_Context_Module(32, 32, 16, 16, dropout=0.05, sizes=([2]))
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(

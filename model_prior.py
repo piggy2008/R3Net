@@ -82,6 +82,7 @@ class R3Net_prior(nn.Module):
 
         if self.attention:
             self.attention_motion = BaseOC_Context_Module(32, 32, 16, 16, dropout=0.05, sizes=([2]))
+            self.attention_reduce_high = BaseOC_Context_Module(256, 256, 128, 128, dropout=0.05, sizes=([2]))
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -160,6 +161,9 @@ class R3Net_prior(nn.Module):
         if self.se_layer:
             # reduce_low = self.reduce_low_se(reduce_low)
             reduce_high = self.reduce_high_se(reduce_high)
+
+        if self.attention_motion:
+            reduce_high = self.attention_reduce_high(reduce_high)
 
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))

@@ -82,9 +82,7 @@ class R3Net_prior(nn.Module):
 
         if self.st_fuse:
             self.fuse_motion = nn.Sequential(
-                nn.Conv2d(256 + 32, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
-                nn.Conv2d(128, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-                nn.Conv2d(32, 32, kernel_size=1)
+                nn.Conv2d(256, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU()
             )
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
@@ -174,7 +172,7 @@ class R3Net_prior(nn.Module):
                 high_motion = self.motion_se(high_motion)
 
             if self.st_fuse:
-                high_motion = self.fuse_motion(torch.cat([reduce_high, high_motion], dim=1))
+                high_motion = self.fuse_motion(reduce_high) + torch.relu(high_motion)
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

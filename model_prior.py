@@ -11,12 +11,12 @@ from resnext.resnext101 import ResNeXt101
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False, attention=False):
+    def __init__(self, motion='GRU', se_layer=False, st_fuse=False):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
         self.se_layer = se_layer
-        self.attention = attention
+        self.st_fuse = st_fuse
 
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
@@ -80,9 +80,12 @@ class R3Net_prior(nn.Module):
             # self.reduce_low_se = SELayer(256)
             self.motion_se = SELayer(32)
 
-        if self.attention:
-            self.attention_motion = BaseOC_Context_Module(32, 32, 16, 16, dropout=0.05, sizes=([2]))
-            self.attention_reduce_high = BaseOC_Context_Module(256, 256, 128, 128, dropout=0.05, sizes=([2]))
+        if self.st_fuse:
+            self.fuse_motion = nn.Sequential(
+                nn.Conv2d(256 + 32, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+                nn.Conv2d(128, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+                nn.Conv2d(32, 32, kernel_size=1)
+            )
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -162,9 +165,6 @@ class R3Net_prior(nn.Module):
             # reduce_low = self.reduce_low_se(reduce_low)
             reduce_high = self.reduce_high_se(reduce_high)
 
-        if self.attention_motion:
-            reduce_high = self.attention_reduce_high(reduce_high)
-
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
             # reduce_low = low_side[0].squeeze(0)
@@ -173,8 +173,8 @@ class R3Net_prior(nn.Module):
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
 
-            if self.attention:
-                high_motion = self.attention_motion(high_motion)
+            if self.st_fuse:
+                high_motion = self.fuse_motion(torch.cat([reduce_high, high_motion], dim=1))
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

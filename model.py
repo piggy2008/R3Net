@@ -136,6 +136,9 @@ class R3Net(nn.Module):
             reduce_low = self.reduce_low_se(reduce_low)
             reduce_high = self.reduce_high_se(reduce_high)
 
+        if self.attention:
+            reduce_high = self.reduce_atte(reduce_high)
+
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
             # reduce_low = low_side[0].squeeze(0)

@@ -28,7 +28,7 @@ exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
     'motion': '',
-    'se_layer': True,
+    'se_layer': False,
     'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,

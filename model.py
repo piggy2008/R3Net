@@ -6,14 +6,15 @@ from module.convLSTM import ConvLSTM
 from matplotlib import pyplot as plt
 from module.se_layer import SELayer
 from resnext.resnext101 import ResNeXt101
-
+from module.attention import BaseOC_Context_Module
 
 class R3Net(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False):
+    def __init__(self, motion='GRU', se_layer=False, attention=False):
         super(R3Net, self).__init__()
 
         self.motion = motion
         self.se_layer = se_layer
+        self.attention = attention
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
@@ -75,6 +76,9 @@ class R3Net(nn.Module):
             self.reduce_high_se = SELayer(256)
             self.reduce_low_se = SELayer(256)
             # self.motion_se = SELayer(32)
+
+        if self.attention:
+            self.reduce_atte = BaseOC_Context_Module(256, 256, 128, 128, 0.05)
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(

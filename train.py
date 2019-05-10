@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 1
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -29,6 +29,7 @@ exp_name = 'VideoSaliency' + '_' + time_str
 args = {
     'motion': '',
     'se_layer': True,
+    'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -83,7 +84,9 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = R3Net(motion=args['motion'], se_layer=args['se_layer']).cuda().train()
+    net = R3Net(motion=args['motion'],
+                se_layer=args['se_layer'],
+                attention=args['attention']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

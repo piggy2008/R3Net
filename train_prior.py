@@ -34,7 +34,7 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-6,
+    'lr': 1e-8,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.95,
@@ -68,10 +68,10 @@ if args['train_loader'] == 'video_sequence':
     train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
 else:
     joint_transform = joint_transforms.Compose([
-        # joint_transforms.ImageResize(473),
-        joint_transforms.RandomCrop(473),
-        joint_transforms.RandomHorizontallyFlip(),
-        joint_transforms.RandomRotate(10)
+        joint_transforms.ImageResize(473),
+        # joint_transforms.RandomCrop(473),
+        # joint_transforms.RandomHorizontallyFlip(),
+        # joint_transforms.RandomRotate(10)
     ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
@@ -83,7 +83,7 @@ log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.tx
 def fix_parameters(parameters):
     for name, parameter in parameters:
         if name.find('motion') >= 0 or name.find('attention') >= 0\
-                or name.find('GRU') >= 0 or name.find('predict') >= 0:
+                or name.find('GRU') >= 0:
             print(name, 'is not fixed')
 
         else:

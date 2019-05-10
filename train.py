@@ -27,22 +27,23 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
-    'motion': 'GRU',
+    'motion': '',
+    'se_layer': True,
     'iter_num': 10000,
     'iter_save': 5000,
-    'train_batch_size': 1,
+    'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-7,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth'),
-    # 'pretrain': '',
-    # 'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
-    'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
-    # 'train_loader': 'video_image'
-    'train_loader': 'video_sequence'
+    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth'),
+    'pretrain': '',
+    'imgs_file': 'Pre-train/pretrain_all_seq2.txt',
+    # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
+    'train_loader': 'video_image'
+    # 'train_loader': 'video_sequence'
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
@@ -82,9 +83,9 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = R3Net(motion=args['motion']).cuda().train()
+    net = R3Net(motion=args['motion'], se_layer=args['se_layer']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

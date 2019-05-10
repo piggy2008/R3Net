@@ -4,16 +4,16 @@ from torch import nn
 from module.convGRU import ConvGRU
 from module.convLSTM import ConvLSTM
 from matplotlib import pyplot as plt
-
+from module.se_layer import SELayer
 from resnext.resnext101 import ResNeXt101
 
 
 class R3Net(nn.Module):
-    def __init__(self, motion='GRU'):
+    def __init__(self, motion='GRU', se_layer=False):
         super(R3Net, self).__init__()
 
         self.motion = motion
-
+        self.se_layer = se_layer
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
@@ -71,6 +71,11 @@ class R3Net(nn.Module):
                                            return_all_layers=False)
             self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
 
+        if self.se_layer:
+            self.reduce_high_se = SELayer(256)
+            self.reduce_low_se = SELayer(256)
+            # self.motion_se = SELayer(32)
+
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
             nn.Conv2d(257, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
@@ -122,6 +127,10 @@ class R3Net(nn.Module):
             layer3,
             F.upsample(layer4, size=layer3.size()[2:], mode='bilinear', align_corners=True)), 1))
         reduce_high = F.upsample(reduce_high, size=l0_size, mode='bilinear', align_corners=True)
+
+        if self.se_layer:
+            reduce_low = self.reduce_low_se(reduce_low)
+            reduce_high = self.reduce_high_se(reduce_high)
 
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))

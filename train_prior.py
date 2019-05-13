@@ -34,7 +34,7 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-8,
+    'lr': 1e-6,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.95,
@@ -95,7 +95,7 @@ def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
                       st_fuse=args['st_fuse']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

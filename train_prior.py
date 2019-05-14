@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -29,7 +29,7 @@ exp_name = 'VideoSaliency' + '_' + time_str
 args = {
     'motion': 'GRU',
     'se_layer': False,
-    'st_fuse': False,
+    'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -39,13 +39,13 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-01 23:29:39', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-14 17:13:16', '30000.pth'),
     # 'pretrain': '',
-    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
+    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     'train_loader': 'video_image',
     # 'train_loader': 'video_sequence',
-    'shuffle': False
+    'shuffle': True
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
@@ -68,10 +68,10 @@ if args['train_loader'] == 'video_sequence':
     train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
 else:
     joint_transform = joint_transforms.Compose([
-        joint_transforms.ImageResize(473),
-        # joint_transforms.RandomCrop(473),
-        # joint_transforms.RandomHorizontallyFlip(),
-        # joint_transforms.RandomRotate(10)
+        # joint_transforms.ImageResize(473),
+        joint_transforms.RandomCrop(473),
+        joint_transforms.RandomHorizontallyFlip(),
+        joint_transforms.RandomRotate(10)
     ])
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
@@ -93,7 +93,7 @@ def fix_parameters(parameters):
 
 def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
-                      st_fuse=args['st_fuse']).cuda().train()
+                      attention=args['attention']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

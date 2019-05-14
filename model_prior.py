@@ -11,12 +11,12 @@ from resnext.resnext101 import ResNeXt101
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False, st_fuse=False):
+    def __init__(self, motion='GRU', se_layer=False, attention=False):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
         self.se_layer = se_layer
-        self.st_fuse = st_fuse
+        self.attention = attention
 
         resnext = ResNeXt101()
         self.layer0 = resnext.layer0
@@ -80,10 +80,8 @@ class R3Net_prior(nn.Module):
             # self.reduce_low_se = SELayer(256)
             self.motion_se = SELayer(32)
 
-        if self.st_fuse:
-            self.fuse_motion = nn.Sequential(
-                nn.Conv2d(256, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU()
-            )
+        if self.attention:
+            self.reduce_atte = BaseOC_Context_Module(256, 256, 128, 128, 0.05, sizes=([2]))
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
         self.predict1 = nn.Sequential(
@@ -163,6 +161,9 @@ class R3Net_prior(nn.Module):
             # reduce_low = self.reduce_low_se(reduce_low)
             reduce_high = self.reduce_high_se(reduce_high)
 
+        if self.attention:
+            reduce_high = self.reduce_atte(reduce_high)
+
         if len(self.motion) > 0:
             # low_side, low_state = self.reduce_low_GRU(reduce_low.unsqueeze(0))
             # reduce_low = low_side[0].squeeze(0)
@@ -170,9 +171,6 @@ class R3Net_prior(nn.Module):
             high_motion = high_side[0].squeeze(0)
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
-
-            if self.st_fuse:
-                high_motion = self.fuse_motion(reduce_high) + torch.relu(high_motion)
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

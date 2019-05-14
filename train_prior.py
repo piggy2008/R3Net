@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -34,7 +34,7 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-6,
+    'lr': 1e-3,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.95,

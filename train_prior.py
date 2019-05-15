@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -34,12 +34,12 @@ args = {
     'iter_save': 10000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-6,
+    'lr': 1e-4,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-15 03:06:29', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-14 17:13:16', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
@@ -95,7 +95,7 @@ def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
                       attention=args['attention']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

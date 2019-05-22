@@ -100,7 +100,7 @@ def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
                       attention=args['attention'], pre_attention=args['pre_attention'], isTriplet=args['isTriplet']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

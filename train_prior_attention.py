@@ -19,7 +19,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -32,6 +32,7 @@ args = {
     'se_layer': False,
     'attention': True,
     'pre_attention': True,
+    'isTriplet': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -80,6 +81,8 @@ else:
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=args['shuffle'])
 
 criterion = nn.BCEWithLogitsLoss().cuda()
+if args['isTriplet']:
+    criterion_triplet = nn.TripletMarginLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
 
 def fix_parameters(parameters):
@@ -95,9 +98,9 @@ def fix_parameters(parameters):
 
 def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
-                      attention=args['attention'], pre_attention=args['pre_attention']).cuda().train()
+                      attention=args['attention'], pre_attention=args['pre_attention'], isTriplet=args['isTriplet']).cuda().train()
 
-    # fix_parameters(net.named_parameters())
+    fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},
@@ -127,6 +130,8 @@ def train(net, optimizer):
     while True:
         total_loss_record, loss0_record, loss1_record = AvgMeter(), AvgMeter(), AvgMeter()
         loss2_record, loss3_record, loss4_record = AvgMeter(), AvgMeter(), AvgMeter()
+        if args['isTriplet']:
+            loss_triplet_record = AvgMeter()
 
         for i, data in enumerate(train_loader):
             optimizer.param_groups[0]['lr'] = 2 * args['lr'] * (1 - float(curr_iter) / args['iter_num']
@@ -143,27 +148,50 @@ def train(net, optimizer):
             labels = Variable(labels).cuda()
 
             optimizer.zero_grad()
-            outputs0, outputs1, outputs2, outputs3, outputs4 = net(inputs)
+            if args['isTriplet']:
+                outputs0, outputs1, outputs2, outputs3, outputs4, outputs_triplet = net(inputs)
+            else:
+                outputs0, outputs1, outputs2, outputs3, outputs4 = net(inputs)
             loss0 = criterion(outputs0, labels)
             loss1 = criterion(outputs1, labels.narrow(0, 1, 4))
             loss2 = criterion(outputs2, labels.narrow(0, 2, 3))
             loss3 = criterion(outputs3, labels.narrow(0, 3, 2))
             loss4 = criterion(outputs4, labels.narrow(0, 4, 1))
 
-            total_loss = loss0 + loss1 + loss2 + loss3 + loss4
-            total_loss.backward()
-            optimizer.step()
+            if args['isTriplet']:
+                loss_triplet = criterion_triplet(outputs_triplet[0], outputs_triplet[1], outputs_triplet[2])
+                total_loss = loss0 + loss1 + loss2 + loss3 + loss4 + 0.2 * loss_triplet
+                total_loss.backward()
+                optimizer.step()
 
-            total_loss_record.update(total_loss.data, batch_size)
-            loss0_record.update(loss0.data, batch_size)
-            loss1_record.update(loss1.data, batch_size)
-            loss2_record.update(loss2.data, batch_size)
-            loss3_record.update(loss3.data, batch_size)
-            loss4_record.update(loss4.data, batch_size)
+                total_loss_record.update(total_loss.data, batch_size)
+                loss0_record.update(loss0.data, batch_size)
+                loss1_record.update(loss1.data, batch_size)
+                loss2_record.update(loss2.data, batch_size)
+                loss3_record.update(loss3.data, batch_size)
+                loss4_record.update(loss4.data, batch_size)
+                loss_triplet_record.update(loss_triplet.data, batch_size)
+
+            else:
+                total_loss = loss0 + loss1 + loss2 + loss3 + loss4
+                total_loss.backward()
+                optimizer.step()
+
+                total_loss_record.update(total_loss.data, batch_size)
+                loss0_record.update(loss0.data, batch_size)
+                loss1_record.update(loss1.data, batch_size)
+                loss2_record.update(loss2.data, batch_size)
+                loss3_record.update(loss3.data, batch_size)
+                loss4_record.update(loss4.data, batch_size)
 
             curr_iter += 1
-
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], ' \
+            if args['isTriplet']:
+                log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], ' \
+                      '[loss4 %.5f], [loss_triplet %.5f], [lr %.13f] ' % \
+                      (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, loss2_record.avg,
+                       loss3_record.avg, loss4_record.avg, loss_triplet_record.avg, optimizer.param_groups[1]['lr'])
+            else:
+                log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], ' \
                   '[loss4 %.5f], [lr %.13f]' % \
                   (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, loss2_record.avg,
                    loss3_record.avg, loss4_record.avg, optimizer.param_groups[1]['lr'])

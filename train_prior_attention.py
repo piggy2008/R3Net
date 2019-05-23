@@ -32,7 +32,8 @@ args = {
     'se_layer': False,
     'attention': True,
     'pre_attention': True,
-    'isTriplet': True,
+    'isTriplet': False,
+    'L2':True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,
@@ -83,6 +84,8 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.BCEWithLogitsLoss().cuda()
 if args['isTriplet']:
     criterion_triplet = nn.TripletMarginLoss().cuda()
+if args['L2']:
+    criterion_l2 = nn.MSELoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
 
 def fix_parameters(parameters):
@@ -157,6 +160,13 @@ def train(net, optimizer):
             loss2 = criterion(outputs2, labels.narrow(0, 2, 3))
             loss3 = criterion(outputs3, labels.narrow(0, 3, 2))
             loss4 = criterion(outputs4, labels.narrow(0, 4, 1))
+
+            if args['L2']:
+                loss0 = loss0 + 0.2 * criterion_l2(torch.sigmoid(outputs0), labels)
+                loss1 = loss1 + 0.2 * criterion_l2(torch.sigmoid(outputs1), labels.narrow(0, 1, 4))
+                loss2 = loss2 + 0.2 * criterion_l2(torch.sigmoid(outputs2), labels.narrow(0, 2, 3))
+                loss3 = loss3 + 0.2 * criterion_l2(torch.sigmoid(outputs3), labels.narrow(0, 3, 2))
+                loss4 = loss4 + 0.2 * criterion_l2(torch.sigmoid(outputs4), labels.narrow(0, 4, 1))
 
             if args['isTriplet']:
                 loss_triplet = criterion_triplet(outputs_triplet[0], outputs_triplet[1], outputs_triplet[2])

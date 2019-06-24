@@ -10,20 +10,21 @@ from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model import R3Net
 
+from matplotlib import pyplot as plt
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(2)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-04-24 18:43:09'
-
+# exp_name = 'VideoSaliency_2019-05-09 02:49:16'
+exp_name = 'VideoSaliency_2019-04-23 23:16:12'
 args = {
-    'snapshot': '10000',  # your snapshot filename (exclude extension name)
+    'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
-    'save_results': True,  # whether to save the resulting masks
+    'save_results': False,  # whether to save the resulting masks
     'input_size': (473, 473)
 }
 
@@ -37,9 +38,9 @@ to_pil = transforms.ToPILImage()
 # to_test = {'ecssd': ecssd_path}
 to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
 gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+imgs_path = os.path.join(davis_path, 'davis_test2_5f_temp.txt')
 def main():
-    net = R3Net(motion='LSTM')
+    net = R3Net(motion='GRU')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
@@ -76,7 +77,6 @@ def main():
 
                 if args['crf_refine']:
                     prediction = crf_refine(np.array(img), prediction)
-
                 gt = np.array(Image.open(os.path.join(gt_root, img_seq[-1] + '.png')).convert('L'))
                 precision, recall, mae = cal_precision_recall_mae(prediction, gt)
                 for pidx, pdata in enumerate(zip(precision, recall)):

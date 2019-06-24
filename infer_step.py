@@ -18,7 +18,7 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-04-27 01:33:23'
+exp_name = 'VideoSaliency_2019-05-06 22:38:14'
 
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)
@@ -39,7 +39,7 @@ to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
 gt_root = os.path.join(davis_path, 'GT')
 imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 def main():
-    net = R3Net(motion='GRU')
+    net = R3Net(motion='')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))

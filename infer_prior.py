@@ -6,7 +6,7 @@ from PIL import Image
 from torch.autograd import Variable
 from torchvision import transforms
 
-from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path
+from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path, fbms_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model_prior import R3Net_prior
 
@@ -18,7 +18,7 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-04-30 16:38:22'
+exp_name = 'VideoSaliency_2019-05-16 17:52:08'
 
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)
@@ -33,13 +33,16 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-# to_test = {'ecssd': ecssd_path, 'hkuis': hkuis_path, 'pascal': pascals_path, 'sod': sod_path, 'dutomron': dutomron_path}
-# to_test = {'ecssd': ecssd_path}
 to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
 gt_root = os.path.join(davis_path, 'GT')
 imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+
+# to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
+# gt_root = os.path.join(fbms_path, 'GT')
+# imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
+
 def main():
-    net = R3Net_prior(motion='GRU')
+    net = R3Net_prior(motion='GRU', se_layer=False, attention=True)
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))

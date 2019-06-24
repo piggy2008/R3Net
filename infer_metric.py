@@ -8,7 +8,7 @@ from torchvision import transforms
 
 from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
-from model_prior import R3Net_prior
+from model_metric import R3Net_prior
 
 torch.manual_seed(2018)
 

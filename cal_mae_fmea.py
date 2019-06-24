@@ -4,10 +4,11 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-05-04 01:31:33'
+exp_name = 'VideoSaliency_2019-05-14 17:13:16'
 name = 'davis'
+root = '/home/qub/data/saliency/davis/davis_test2'
 gt_root = '/home/qub/data/saliency/davis/GT'
-
+# gt_root = '/home/qub/data/saliency/VOS/GT'
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
@@ -27,8 +28,14 @@ for folder in folders:
 
     for img in imgs:
         print(os.path.join(folder, img))
+        if name == 'VOS':
+            image = Image.open(os.path.join(root, folder, img[:-4] + '.png')).convert('RGB')
+        else:
+            image = Image.open(os.path.join(root, folder, img[:-4] + '.jpg')).convert('RGB')
         gt = np.array(Image.open(os.path.join(gt_root, folder, img)).convert('L'))
         pred = np.array(Image.open(os.path.join(save_path, folder, img)).convert('L'))
+        if args['crf_refine']:
+            pred = crf_refine(np.array(image), pred)
         precision, recall, mae = cal_precision_recall_mae(pred, gt)
 
         for pidx, pdata in enumerate(zip(precision, recall)):
@@ -61,3 +68,32 @@ print (results)
 
 # VideoSaliency_2019-05-03 23:59:44: finetune model prior from 05-01 model, fix other layers excepet motion module
 # {'davis': {'mae': 0.031455319655690664, 'fmeasure': 0.8687384596915435}}
+
+# VideoSaliency_2019-05-14 17:13:16: no finetune
+# using dataset:DUT-OMRON + DAVIS R3Net pre-train
+# {'davis': {'fmeasure': 0.8760938218680382, 'mae': 0.03375186721061853}}
+
+# VideoSaliency_2019-05-15 03:06:29: finetune model prior from VideoSaliency_2019-05-14 17:13:16 model, train entire network with lr:1e-6
+# using dataset:DUT-OMRON + DAVIS R3Net pre-train
+# {'davis': {'fmeasure': 0.8770158996877871, 'mae': 0.03235241246303723}}
+
+# VideoSaliency_2019-05-15 03:06:29: finetune model prior from VideoSaliency_2019-05-14 17:13:16 model, train entire network with lr:1e-5
+# using dataset:DUT-OMRON + DAVIS R3Net pre-train
+# {'davis': {'mae': 0.02977316776424702, 'fmeasure': 0.8773961688318479}}
+# {'FBMS': {'fmeasure': 0.8462238927200698, 'mae': 0.05929029351096353}}
+
+# VideoSaliency_2019-05-17 03:27:37: finetune model prior from VideoSaliency_2019-05-14 17:13:16 model, train entire network with lr:1e-5
+# using dataset:DUT-OMRON + DAVIS R3Net pre-train
+# model: self-attention + motion enhancement + prior attention weight learning
+# {'FBMS': {'fmeasure': 0.8431560452294077, 'mae': 0.0572594186609631}}
+# {'FBMS': {'mae': 0.05151967407911611, 'fmeasure': 0.8512965990283861}} with crf
+# {'VOS': {'fmeasure': 0.7693856907104227, 'mae': 0.07323270547216723}}
+# {'VOS': {'mae': 0.061354405913717075, 'fmeasure': 0.76979294074132}} with crf
+# {'SegTrackV2': {'fmeasure': 0.8900102827035228, 'mae': 0.02371825726384187}}
+# {'SegTrackV2': {'mae': 0.01414643253248216, 'fmeasure': 0.8974274867145704}} with CRF
+# {'MCL': {'fmeasure': 0.7941665988086701, 'mae': 0.03365593652205517}}
+# {'MCL': {'fmeasure': 0.8033409666446579, 'mae': 0.030916401685247424}} with crf
+# {'ViSal': {'mae': 0.01547489956096272, 'fmeasure': 0.9517413442552852}}
+# {'ViSal': {'fmeasure': 0.9541724935997185, 'mae': 0.009944043273381801}} with crf
+# {'davis': {'fmeasure': 0.877271448077333, 'mae': 0.028900763530552247}}
+# {'davis': {'fmeasure': 0.8877485369547635, 'mae': 0.017803576387589698}} with crf

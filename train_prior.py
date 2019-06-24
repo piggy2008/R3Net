@@ -13,12 +13,13 @@ from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_p
 from datasets import ImageFolder, VideoImageFolder, VideoSequenceFolder
 from misc import AvgMeter, check_mkdir
 from model_prior import R3Net_prior
+# from model_prior_attention import R3Net_prior
 from torch.backends import cudnn
 import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 

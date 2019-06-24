@@ -15,7 +15,7 @@ def load_part_of_model(new_model, src_model_path, device_id=0):
 
 if __name__ == '__main__':
     ckpt_path = './ckpt'
-    exp_name = 'VideoSaliency_2019-04-20 23:11:17'
+    exp_name = 'VideoSaliency_2019-04-23 23:16:12'
 
     args = {
         'snapshot': '30000',  # your snapshot filename (exclude extension name)
@@ -24,5 +24,5 @@ if __name__ == '__main__':
         'input_size': (473, 473)
     }
     src_model_path = os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth')
-    net = R3Net(motion=True)
+    net = R3Net(motion='GRU')
     net = load_part_of_model(net, src_model_path)

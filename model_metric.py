@@ -135,6 +135,23 @@ class R3Net_prior(nn.Module):
             if isinstance(m, nn.ReLU) or isinstance(m, nn.Dropout):
                 m.inplace = True
 
+    def extract_region(self, feats, final_map):
+        batch_size = feats.size(0)
+        final_map = torch.sigmoid(final_map)
+        tmp_zeros = torch.zeros_like(final_map)
+        tmp_ones = torch.ones_like(final_map)
+        neg = torch.where(final_map < 0.3, tmp_ones, tmp_zeros)
+        anchor = torch.where(final_map > 0.9, tmp_ones, tmp_zeros)
+        pos = torch.where(final_map > 0.6, final_map, tmp_zeros)
+        pos = torch.where(pos < 0.9, pos, tmp_zeros)
+        pos = torch.where(pos > 0, tmp_ones, tmp_zeros)
+
+        feats_anchor = F.adaptive_avg_pool2d(feats * anchor, 8)
+        feats_pos = F.adaptive_avg_pool2d(feats * pos, 8)
+        feats_neg = F.adaptive_avg_pool2d(feats * neg, 8)
+
+        return [F.normalize(feats_anchor.view(batch_size, -1)), F.normalize(feats_pos.view(batch_size, -1)), F.normalize(feats_neg.view(batch_size, -1))]
+
     def forward(self, x):
         layer0 = self.layer0(x)
         layer1 = self.layer1(layer0)
@@ -198,15 +215,17 @@ class R3Net_prior(nn.Module):
         fourth_motion = high_motion.narrow(0, 3, 1)
         predict4_motion = self.predict4_motion(torch.cat([fourth_sal, fourth_reduce_high + fourth_motion], 1)) + predict3_motion.narrow(0, 1, 1)
 
+        triplet = self.extract_region(torch.cat([predict2, predict3, predict4, predict5, predict6], dim=1),
+                                               predict4_motion)
+
         predict6 = F.upsample(predict6, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict1_motion = F.upsample(predict1_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict2_motion = F.upsample(predict2_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict3_motion = F.upsample(predict3_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict4_motion = F.upsample(predict4_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
 
-
         if self.training:
-            return predict6, predict1_motion, predict2_motion, predict3_motion, predict4_motion
+            return predict6, predict1_motion, predict2_motion, predict3_motion, predict4_motion, triplet
         return F.sigmoid(predict4_motion)
 
 

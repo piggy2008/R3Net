@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -27,12 +27,13 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
+    'basic_model': 'resnext50',
     'motion': '',
     'se_layer': False,
     'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,
-    'train_batch_size': 6,
+    'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-3,
     'lr_decay': 0.9,
@@ -86,7 +87,7 @@ def fix_parameters(parameters):
 def main():
     net = R3Net(motion=args['motion'],
                 se_layer=args['se_layer'],
-                attention=args['attention']).cuda().train()
+                attention=args['attention'], basic_model=args['basic_model']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

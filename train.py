@@ -22,6 +22,7 @@ device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
+
 time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str

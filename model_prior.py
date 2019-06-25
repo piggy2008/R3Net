@@ -8,17 +8,21 @@ from module.se_layer import SELayer
 from module.attention import BaseOC_Context_Module
 
 from resnext.resnext101 import ResNeXt101
+from resnext.resnext50 import ResNeXt50
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False, attention=False):
+    def __init__(self, motion='GRU', se_layer=False, attention=False, basic_model='resnext50'):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
         self.se_layer = se_layer
         self.attention = attention
 
-        resnext = ResNeXt101()
+        if basic_model == 'resnext50':
+            resnext = ResNeXt50()
+        else:
+            resnext = ResNeXt101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
         self.layer2 = resnext.layer2

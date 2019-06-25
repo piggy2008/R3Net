@@ -6,12 +6,12 @@ from module.convLSTM import ConvLSTM
 from matplotlib import pyplot as plt
 from module.se_layer import SELayer
 from module.attention import BaseOC_Context_Module
-
+from resnext.resnext50 import ResNeXt50
 from resnext.resnext101 import ResNeXt101
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False):
+    def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False, basic_model='resnext50'):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
@@ -20,7 +20,10 @@ class R3Net_prior(nn.Module):
         self.pre_attention = pre_attention
         self.isTriplet = isTriplet
 
-        resnext = ResNeXt101()
+        if basic_model == 'resnext50':
+            resnext = ResNeXt50()
+        else:
+            resnext = ResNeXt101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
         self.layer2 = resnext.layer2

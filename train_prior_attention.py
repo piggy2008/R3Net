@@ -28,6 +28,7 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
+    'basic_model': 'resnext50',
     'motion': 'GRU',
     'se_layer': False,
     'attention': True,
@@ -43,7 +44,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-14 17:13:16', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-06-25 00:58:16', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
@@ -101,7 +102,8 @@ def fix_parameters(parameters):
 
 def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
-                      attention=args['attention'], pre_attention=args['pre_attention'], isTriplet=args['isTriplet']).cuda().train()
+                      attention=args['attention'], pre_attention=args['pre_attention'],
+                      isTriplet=args['isTriplet'], basic_model=args['basic_model']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

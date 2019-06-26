@@ -105,7 +105,7 @@ def main():
                       attention=args['attention'], pre_attention=args['pre_attention'],
                       isTriplet=args['isTriplet'], basic_model=args['basic_model']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

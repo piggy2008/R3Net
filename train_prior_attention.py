@@ -31,7 +31,7 @@ args = {
     'basic_model': 'resnext101',
     'motion': 'no',
     'se_layer': False,
-    'attention': False,
+    'attention': True,
     'pre_attention': True,
     'isTriplet': False,
     'L2': False,

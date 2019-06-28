@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 from module.se_layer import SELayer
 from resnext.resnext101 import ResNeXt101
 from resnext.resnext50 import ResNeXt50
+from resnext.resnet50 import ResNet50
+from resnext.resnet101 import ResNet101
 from module.attention import BaseOC_Context_Module
 
 class R3Net(nn.Module):
@@ -18,8 +20,12 @@ class R3Net(nn.Module):
         self.attention = attention
         if basic_model == 'resnext50':
             resnext = ResNeXt50()
-        else:
+        elif basic_model == 'resnext101':
             resnext = ResNeXt101()
+        elif basic_model == 'resnet50':
+            resnext = ResNet50()
+        else:
+            resnext = ResNet101()
         self.layer0 = resnext.layer0
         self.layer1 = resnext.layer1
         self.layer2 = resnext.layer2

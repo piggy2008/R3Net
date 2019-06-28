@@ -2,10 +2,10 @@ import torch
 from torch import nn
 import torchvision.models as models
 
-class ResNet101(nn.Module):
+class ResNet50(nn.Module):
     def __init__(self):
-        super(ResNet101, self).__init__()
-        net = models.resnet101(pretrained=True)
+        super(ResNet50, self).__init__()
+        net = models.resnet50(pretrained=True)
         # net.load_state_dict(torch.load(resnext101_32_path))
 
         net = list(net.children())
@@ -24,4 +24,4 @@ class ResNet101(nn.Module):
         return layer4
 
 if __name__ == '__main__':
-    model = ResNet101()
+    model = ResNet50()

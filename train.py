@@ -18,7 +18,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 1
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -28,10 +28,10 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
-    'basic_model': 'resnet101',
+    'basic_model': 'resnet50',
     'motion': '',
     'se_layer': False,
-    'attention': False,
+    'attention': True,
     'iter_num': 30000,
     'iter_save': 10000,
     'train_batch_size': 5,

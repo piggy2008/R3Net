@@ -29,9 +29,9 @@ exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
     'basic_model': 'resnet101',
-    'motion': 'GRU',
+    'motion': 'no',
     'se_layer': False,
-    'attention': False,
+    'attention': True,
     'pre_attention': True,
     'isTriplet': False,
     'L2': False,
@@ -44,7 +44,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-06-28 22:46:18', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-05-14 17:13:16', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',

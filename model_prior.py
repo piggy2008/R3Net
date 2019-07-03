@@ -78,6 +78,12 @@ class R3Net_prior(nn.Module):
                                            bias=True,
                                            return_all_layers=False)
             # self.motion_predict = nn.Conv2d(256, 1, kernel_size=1)
+        elif self.motion == 'no':
+            self.reduce_high_motion = nn.Sequential(
+                nn.Conv2d(256, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+                nn.Conv2d(128, 128, kernel_size=3, padding=1), nn.BatchNorm2d(128), nn.PReLU(),
+                nn.Conv2d(128, 32, kernel_size=1)
+            )
 
         if self.se_layer:
             self.reduce_high_se = SELayer(256)

@@ -19,7 +19,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 0
+device_id = 2
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -105,7 +105,7 @@ def main():
                       attention=args['attention'], pre_attention=args['pre_attention'],
                       isTriplet=args['isTriplet'], basic_model=args['basic_model']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

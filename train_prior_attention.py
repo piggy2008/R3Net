@@ -34,7 +34,7 @@ args = {
     'attention': False,
     'pre_attention': True,
     'isTriplet': False,
-    'L2': False,
+    'L2': True,
     'iter_num': 30000,
     'iter_save': 5000,
     'train_batch_size': 5,
@@ -42,7 +42,7 @@ args = {
     'lr': 1e-5,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
-    'momentum': 0.99,
+    'momentum': 0.975,
     'snapshot': '',
     'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-06-26 18:08:11', '20000.pth'),
     # 'pretrain': '',
@@ -164,11 +164,11 @@ def train(net, optimizer):
             loss4 = criterion(outputs4, labels.narrow(0, 4, 1))
 
             if args['L2']:
-                loss0 = loss0 + 0.5 * criterion_l2(torch.sigmoid(outputs0), labels)
-                loss1 = loss1 + 0.5 * criterion_l2(torch.sigmoid(outputs1), labels.narrow(0, 1, 4))
-                loss2 = loss2 + 0.5 * criterion_l2(torch.sigmoid(outputs2), labels.narrow(0, 2, 3))
-                loss3 = loss3 + 0.5 * criterion_l2(torch.sigmoid(outputs3), labels.narrow(0, 3, 2))
-                loss4 = loss4 + 0.5 * criterion_l2(torch.sigmoid(outputs4), labels.narrow(0, 4, 1))
+                loss0 = loss0 + 0.25 * criterion_l2(torch.sigmoid(outputs0), labels)
+                loss1 = loss1 + 0.25 * criterion_l2(torch.sigmoid(outputs1), labels.narrow(0, 1, 4))
+                loss2 = loss2 + 0.25 * criterion_l2(torch.sigmoid(outputs2), labels.narrow(0, 2, 3))
+                loss3 = loss3 + 0.25 * criterion_l2(torch.sigmoid(outputs3), labels.narrow(0, 3, 2))
+                loss4 = loss4 + 0.25 * criterion_l2(torch.sigmoid(outputs4), labels.narrow(0, 4, 1))
 
             if args['isTriplet']:
                 loss_triplet = criterion_triplet(outputs_triplet[0], outputs_triplet[1], outputs_triplet[2])

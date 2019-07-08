@@ -19,7 +19,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 1
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -42,7 +42,7 @@ args = {
     'lr': 1e-5,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
-    'momentum': 0.95,
+    'momentum': 0.99,
     'snapshot': '',
     'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-06-26 18:08:11', '20000.pth'),
     # 'pretrain': '',

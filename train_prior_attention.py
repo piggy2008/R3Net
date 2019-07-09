@@ -34,7 +34,7 @@ args = {
     'attention': False,
     'pre_attention': True,
     'isTriplet': False,
-    'L2': True,
+    'L2': False,
     'iter_num': 30000,
     'iter_save': 5000,
     'train_batch_size': 5,

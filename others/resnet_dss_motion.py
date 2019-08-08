@@ -214,8 +214,9 @@ class DSS(nn.Module):
         predict2_motion = F.upsample(predict2_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict3_motion = F.upsample(predict3_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
         predict4_motion = F.upsample(predict4_motion, size=x.size()[2:], mode='bilinear', align_corners=True)
-
-        return final_dsn, predict1_motion, predict2_motion, predict3_motion, predict4_motion
+        if self.training:
+            return final_dsn, predict1_motion, predict2_motion, predict3_motion, predict4_motion
+        return F.sigmoid(predict4_motion)
 
     def attention_pre_sal(self, pre_sals):
         expand_num = len(pre_sals)

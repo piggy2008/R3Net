@@ -20,7 +20,7 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-06-28 22:46:18'
+exp_name = 'VideoSaliency_2019-08-08 18:04:10'
 
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)

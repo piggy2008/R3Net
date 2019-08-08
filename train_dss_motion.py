@@ -12,7 +12,7 @@ import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path
 from datasets import ImageFolder, VideoImageFolder, VideoSequenceFolder
 from misc import AvgMeter, check_mkdir
-from others.resnet_dss import DSS
+from others.resnet_dss_motion import DSS
 from torch.backends import cudnn
 import time
 from utils import load_part_of_model

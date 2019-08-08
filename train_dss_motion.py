@@ -137,10 +137,10 @@ def train(net, optimizer):
             optimizer.zero_grad()
             outputs0, outputs1, outputs2, outputs3, outputs4 = net(inputs)
             loss0 = criterion(outputs0, labels)
-            loss1 = criterion(outputs1, labels)
-            loss2 = criterion(outputs2, labels)
-            loss3 = criterion(outputs3, labels)
-            loss4 = criterion(outputs4, labels)
+            loss1 = criterion(outputs1, labels.narrow(0, 1, 4))
+            loss2 = criterion(outputs2, labels.narrow(0, 2, 3))
+            loss3 = criterion(outputs3, labels.narrow(0, 3, 2))
+            loss4 = criterion(outputs4, labels.narrow(0, 4, 1))
 
             total_loss = loss0 + loss1 + loss2 + loss3 + loss4
             total_loss.backward()

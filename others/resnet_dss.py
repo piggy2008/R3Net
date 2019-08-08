@@ -100,8 +100,9 @@ class DSS(nn.Module):
         dsn2_out_up = F.upsample(dsn2_fuse, size=x_size, mode='bilinear', align_corners=True)
 
         final_dsn = self.dsn_all_fuse(torch.cat([dsn6_out_up, dsn5_out_up, dsn4_out_up, dsn3_out_up, dsn2_out_up], dim=1))
-
-        return dsn6_out_up, dsn5_out_up, dsn4_out_up, dsn3_out_up, dsn2_out_up, final_dsn
+        if self.training:
+            return dsn6_out_up, dsn5_out_up, dsn4_out_up, dsn3_out_up, dsn2_out_up, final_dsn
+        return F.sigmoid(final_dsn)
 
 if __name__ == '__main__':
     model = DSS()

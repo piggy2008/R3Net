@@ -186,7 +186,9 @@ class R3Net_prior(nn.Module):
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
             if self.spa:
+                high_motion = F.upsample(high_motion, size=(80, 80), mode='bilinear', align_corners=True)
                 high_motion = self.spa_module(high_motion)
+                high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

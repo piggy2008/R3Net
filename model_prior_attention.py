@@ -186,7 +186,7 @@ class R3Net_prior(nn.Module):
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
             if self.spa:
-                high_motion = F.upsample(high_motion, size=(80, 80), mode='bilinear', align_corners=True)
+                high_motion = F.upsample(high_motion, size=(70, 70), mode='bilinear', align_corners=True)
                 high_motion = self.spa_module(high_motion)
                 high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
 

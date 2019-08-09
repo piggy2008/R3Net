@@ -35,6 +35,7 @@ args = {
     'pre_attention': True,
     'isTriplet': False,
     'L2': False,
+    'spa': True,
     'iter_num': 30000,
     'iter_save': 5000,
     'train_batch_size': 5,
@@ -103,7 +104,7 @@ def fix_parameters(parameters):
 def main():
     net = R3Net_prior(motion=args['motion'], se_layer=args['se_layer'],
                       attention=args['attention'], pre_attention=args['pre_attention'],
-                      isTriplet=args['isTriplet'], basic_model=args['basic_model']).cuda().train()
+                      isTriplet=args['isTriplet'], basic_model=args['basic_model'], spa=args['spa']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([

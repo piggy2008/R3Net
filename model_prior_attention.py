@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch import nn
 from module.convGRU import ConvGRU
 from module.convLSTM import ConvLSTM
+from module.spa_module import PAM_Module
 from matplotlib import pyplot as plt
 from module.se_layer import SELayer
 from module.attention import BaseOC_Context_Module
@@ -13,7 +14,8 @@ from resnext.resnet50 import ResNet50
 
 
 class R3Net_prior(nn.Module):
-    def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False, basic_model='resnext50'):
+    def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False,
+                 basic_model='resnext50', spa=False):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
@@ -21,6 +23,7 @@ class R3Net_prior(nn.Module):
         self.attention = attention
         self.pre_attention = pre_attention
         self.isTriplet = isTriplet
+        self.spa = spa
 
         if basic_model == 'resnext50':
             resnext = ResNeXt50()
@@ -48,7 +51,7 @@ class R3Net_prior(nn.Module):
         )
         if self.motion == 'GRU':
             self.reduce_high_motion = ConvGRU(input_size=(119, 119), input_dim=256,
-                                          hidden_dim=128,
+                                          hidden_dim=64,
                                           kernel_size=(3, 3),
                                           num_layers=1,
                                           batch_first=True,
@@ -58,7 +61,7 @@ class R3Net_prior(nn.Module):
 
         elif self.motion == 'LSTM':
             self.reduce_high_motion = ConvLSTM(input_size=(119, 119), input_dim=256,
-                                           hidden_dim=32,
+                                           hidden_dim=64,
                                            kernel_size=(3, 3),
                                            num_layers=1,
                                            padding=1,
@@ -86,6 +89,9 @@ class R3Net_prior(nn.Module):
             self.pre_sals_attention2 = SELayer(2, 1)
             self.pre_sals_attention3 = SELayer(3, 1)
             self.pre_sals_attention4 = SELayer(4, 1)
+
+        if self.spa:
+            self.spa_module = PAM_Module(64)
 
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
@@ -121,24 +127,24 @@ class R3Net_prior(nn.Module):
         )
 
         self.predict1_motion = nn.Sequential(
-            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 1, kernel_size=1)
+            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict2_motion = nn.Sequential(
-            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 1, kernel_size=1)
+            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict3_motion = nn.Sequential(
-            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 1, kernel_size=1)
+            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
         self.predict4_motion = nn.Sequential(
-            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
-            nn.Conv2d(64, 1, kernel_size=1)
+            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
+            nn.Conv2d(32, 1, kernel_size=1)
         )
 
         for m in self.modules():
@@ -179,6 +185,8 @@ class R3Net_prior(nn.Module):
                 high_motion = high_side[0].squeeze(0)
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
+            if self.spa:
+                high_motion = self.spa_module(high_motion)
 
         predict0 = self.predict0(reduce_high)
         predict1 = self.predict1(torch.cat((predict0, reduce_low), 1)) + predict0

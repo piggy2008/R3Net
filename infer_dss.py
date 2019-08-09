@@ -9,7 +9,7 @@ from torchvision import transforms
 from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, \
     davis_path, fbms_path, mcl_path, uvsd_path, visal_path, vos_path, segtrack_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
-from others.resnet_dss_motion import DSS
+from others.resnet_dss import DSS
 from utils import MaxMinNormalization
 
 torch.manual_seed(2018)
@@ -20,7 +20,7 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-08 23:13:19'
+exp_name = 'VideoSaliency_2019-08-08 18:04:10'
 
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)

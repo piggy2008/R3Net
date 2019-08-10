@@ -10,19 +10,20 @@ from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path
     davis_path, fbms_path, mcl_path, uvsd_path, visal_path, vos_path, segtrack_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model_prior_attention import R3Net_prior
+from utils import MaxMinNormalization
 
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(1)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-06-27 00:20:01'
+exp_name = 'VideoSaliency_2019-08-09 23:13:08'
 
 args = {
-    'snapshot': '10000',  # your snapshot filename (exclude extension name)
+    'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -63,7 +64,7 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_5f.txt')
 
 def main():
-    net = R3Net_prior(motion='no', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101')
+    net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', spa=True)
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
@@ -100,6 +101,9 @@ def main():
                 precision = to_pil(prediction.data.squeeze(0).cpu())
                 precision = precision.resize(shape)
                 prediction = np.array(precision)
+                prediction = prediction.astype('float')
+                prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
+                prediction = prediction.astype('uint8')
 
                 if args['crf_refine']:
                     prediction = crf_refine(np.array(img), prediction)

@@ -94,7 +94,7 @@ class R3Net_prior(nn.Module):
         if self.sta:
             self.sta_module = STA_Module(64)
             self.sp_down = nn.Sequential(
-                nn.Conv2d(256, 64, kernel_size=1), nn.PReLU()
+                nn.Conv2d(256, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU()
             )
 
 
@@ -190,12 +190,13 @@ class R3Net_prior(nn.Module):
             if self.se_layer:
                 high_motion = self.motion_se(high_motion)
             if self.sta:
-                high_motion = F.upsample(high_motion, size=(70, 70), mode='bilinear', align_corners=True)
-                reduce_high_down = F.upsample(reduce_high, size=(70, 70), mode='bilinear', align_corners=True)
+                high_motion = F.upsample(high_motion, size=(75, 75), mode='bilinear', align_corners=True)
+                reduce_high_down = F.upsample(reduce_high, size=(75, 75), mode='bilinear', align_corners=True)
                 reduce_high_down = self.sp_down(reduce_high_down)
-                high_motion = self.sta_module(high_motion,
-                                              reduce_high_down.normal_(mean=float(high_motion.mean().data.cpu().numpy()),
-                                                                       std=float(high_motion.std().data.cpu().numpy())))
+                # high_motion = self.sta_module(high_motion,
+                #                               reduce_high_down.normal_(mean=float(high_motion.mean().data.cpu().numpy()),
+                #                                                        std=float(high_motion.std().data.cpu().numpy())))
+                high_motion = self.sta_module(high_motion, reduce_high_down)
                 high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
 
         predict0 = self.predict0(reduce_high)

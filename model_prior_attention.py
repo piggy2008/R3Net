@@ -12,6 +12,7 @@ from resnext.resnext101 import ResNeXt101
 from resnext.resnet101 import ResNet101
 from resnext.resnet50 import ResNet50
 
+import numpy as np
 
 class R3Net_prior(nn.Module):
     def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False,
@@ -192,7 +193,9 @@ class R3Net_prior(nn.Module):
                 high_motion = F.upsample(high_motion, size=(70, 70), mode='bilinear', align_corners=True)
                 reduce_high_down = F.upsample(reduce_high, size=(70, 70), mode='bilinear', align_corners=True)
                 reduce_high_down = self.sp_down(reduce_high_down)
-                high_motion = self.sta_module(high_motion, reduce_high_down)
+                high_motion = self.sta_module(high_motion,
+                                              reduce_high_down.normal_(mean=float(high_motion.mean().data.cpu().numpy()),
+                                                                       std=float(high_motion.std().data.cpu().numpy())))
                 high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
 
         predict0 = self.predict0(reduce_high)

@@ -52,7 +52,7 @@ class R3Net_prior(nn.Module):
         )
         if self.motion == 'GRU':
             self.reduce_high_motion = ConvGRU(input_size=(119, 119), input_dim=256,
-                                          hidden_dim=64,
+                                          hidden_dim=128,
                                           kernel_size=(3, 3),
                                           num_layers=1,
                                           batch_first=True,
@@ -62,7 +62,7 @@ class R3Net_prior(nn.Module):
 
         elif self.motion == 'LSTM':
             self.reduce_high_motion = ConvLSTM(input_size=(119, 119), input_dim=256,
-                                           hidden_dim=64,
+                                           hidden_dim=128,
                                            kernel_size=(3, 3),
                                            num_layers=1,
                                            padding=1,
@@ -92,9 +92,9 @@ class R3Net_prior(nn.Module):
             self.pre_sals_attention4 = SELayer(4, 1)
 
         if self.sta:
-            self.sta_module = STA_Module(64)
+            self.sta_module = STA_Module(128)
             self.sp_down = nn.Sequential(
-                nn.Conv2d(256, 64, kernel_size=1), nn.BatchNorm2d(64), nn.PReLU()
+                nn.Conv2d(256, 128, kernel_size=1), nn.BatchNorm2d(64), nn.PReLU()
             )
 
 
@@ -131,24 +131,24 @@ class R3Net_prior(nn.Module):
         )
 
         self.predict1_motion = nn.Sequential(
-            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 1, kernel_size=1)
         )
         self.predict2_motion = nn.Sequential(
-            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 1, kernel_size=1)
         )
         self.predict3_motion = nn.Sequential(
-            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 1, kernel_size=1)
         )
         self.predict4_motion = nn.Sequential(
-            nn.Conv2d(65, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1), nn.BatchNorm2d(32), nn.PReLU(),
-            nn.Conv2d(32, 1, kernel_size=1)
+            nn.Conv2d(129, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1), nn.BatchNorm2d(64), nn.PReLU(),
+            nn.Conv2d(64, 1, kernel_size=1)
         )
 
         for m in self.modules():

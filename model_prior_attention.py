@@ -94,7 +94,7 @@ class R3Net_prior(nn.Module):
         if self.sta:
             self.sta_module = STA_Module(128)
             self.sp_down = nn.Sequential(
-                nn.Conv2d(256, 128, kernel_size=1), nn.BatchNorm2d(128), nn.PReLU()
+                nn.Conv2d(256, 128, kernel_size=1), nn.PReLU()
             )
 
 

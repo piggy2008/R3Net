@@ -7,7 +7,7 @@ from torch.autograd import Variable
 from torchvision import transforms
 
 from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, \
-    davis_path, fbms_path, mcl_path, uvsd_path, visal_path, vos_path, segtrack_path
+    davis_path, fbms_path, mcl_path, uvsd_path, visal_path, vos_path, segtrack_path, davsod_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model_prior_attention import R3Net_prior
 from utils import MaxMinNormalization
@@ -20,7 +20,7 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-12 04:57:41'
+exp_name = 'VideoSaliency_2019-08-12 18:04:15'
 
 args = {
     'snapshot': '30000',  # your snapshot filename (exclude extension name)
@@ -63,6 +63,10 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # gt_root = os.path.join(segtrack_path, 'GT')
 # imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_5f.txt')
 
+# to_test = {'DAVSOD': os.path.join(davsod_path, 'DAVSOD_test')}
+# gt_root = os.path.join(davsod_path, 'GT')
+# imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
+
 def main():
     net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)
 
@@ -88,7 +92,7 @@ def main():
                 img_seq = img_names.split(',')
                 img_var = []
                 for img_name in img_seq:
-                    if name == 'VOS':
+                    if name == 'VOS' or name == 'DAVSOD':
                         img = Image.open(os.path.join(root, img_name + '.png')).convert('RGB')
                     else:
                         img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')

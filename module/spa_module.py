@@ -72,7 +72,8 @@ class STA_Module(nn.Module):
         out = out.view(m_batchsize, C, height, width)
         out2 = out2.view(m_batchsize, C, height, width)
 
-        out = self.gamma*out + x_temporal + self.gamma2*out2 + x_temporal
+        # out = self.gamma*out + x_temporal + self.gamma2*out2 + x_temporal
+        out = self.gamma * out + self.gamma2 * out2
         return out
 
 if __name__ == '__main__':

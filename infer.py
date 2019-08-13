@@ -63,7 +63,7 @@ imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
 # imgs_path = os.path.join(mcl_path, 'MCL_test_single.txt')
 
 def main():
-    net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet50')
+    net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet101')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:1'))

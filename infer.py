@@ -66,7 +66,7 @@ def main():
     net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet50')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
-    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
+    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:1'))
     net.eval()
     net.cuda()
     results = {}

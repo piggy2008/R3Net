@@ -47,6 +47,7 @@ class STA_Module(nn.Module):
         self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
         self.value_conv_spatial = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
         self.value_conv_temporal = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+        self.out_fuse = nn.Conv2d(in_channels=in_dim * 2, out_channels=in_dim, kernel_size=1)
         self.gamma = nn.Parameter(torch.zeros(1))
         self.gamma2 = nn.Parameter(torch.zeros(1))
 
@@ -72,8 +73,11 @@ class STA_Module(nn.Module):
         out = out.view(m_batchsize, C, height, width)
         out2 = out2.view(m_batchsize, C, height, width)
 
-        # out = self.gamma*out + x_temporal + self.gamma2*out2 + x_temporal
-        out = self.gamma * out + self.gamma2 * out2
+        out = self.gamma*out + x_spatial
+        out2 = self.gamma2*out2 + x_temporal
+        # out = self.gamma*out + x_spatial + self.gamma2*out2 + x_temporal
+        # out = self.gamma * out + self.gamma2 * out2
+        out = self.out_fuse(torch.cat([out, out2], dim=1))
         return out
 
 if __name__ == '__main__':

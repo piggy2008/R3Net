@@ -6,9 +6,9 @@ from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, ca
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency_2019-08-11 05:19:41'
 name = 'davis'
-root = '/home/qub/data/saliency/davis/davis_test2'
+root = '/home/ty/data/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'
-gt_root = '/home/qub/data/saliency/davis/GT'
+gt_root = '/home/ty/data/davis/GT'
 # gt_root = '/home/qub/data/saliency/MCL/GT'
 # gt_root = '/home/qub/data/saliency/VOS/GT'
 args = {

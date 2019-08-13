@@ -52,7 +52,7 @@ class R3Net_prior(nn.Module):
         )
         if self.motion == 'GRU':
             self.reduce_high_motion = ConvGRU(input_size=(119, 119), input_dim=256,
-                                          hidden_dim=128,
+                                          hidden_dim=64,
                                           kernel_size=(3, 3),
                                           num_layers=1,
                                           batch_first=True,
@@ -62,7 +62,7 @@ class R3Net_prior(nn.Module):
 
         elif self.motion == 'LSTM':
             self.reduce_high_motion = ConvLSTM(input_size=(119, 119), input_dim=256,
-                                           hidden_dim=128,
+                                           hidden_dim=64,
                                            kernel_size=(3, 3),
                                            num_layers=1,
                                            padding=1,

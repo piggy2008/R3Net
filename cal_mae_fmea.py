@@ -4,15 +4,15 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-07-02 04:21:40'
-name = 'MCL'
+exp_name = 'VideoSaliency_2019-08-11 05:19:41'
+name = 'davis'
 root = '/home/qub/data/saliency/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'
 gt_root = '/home/qub/data/saliency/davis/GT'
 # gt_root = '/home/qub/data/saliency/MCL/GT'
 # gt_root = '/home/qub/data/saliency/VOS/GT'
 args = {
-    'snapshot': '30000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }
@@ -126,6 +126,10 @@ print (results)
 # no self_attention
 # {'davis': {'mae': 0.02956942893893325, 'fmeasure': 0.8636986541096229}}
 
+# finetune VideoSaliency_2019-06-26 00:07:16 traning from original resnext101 model of torch parameter, using dataset:DUT-TR + DAVIS model: raw R3Net lr:0.001
+# self_attention
+# {'davis': {'mae': 0.0284977837825863, 'fmeasure': 0.874491814537741}}
+
 # VideoSaliency_2019-06-26 18:08:11(20000)traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
 # finetune VideoSaliency_2019-06-26 00:07:16 model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block
 # no self_attention
@@ -162,6 +166,7 @@ print (results)
 # {'SegTrackV2': {'mae': 0.023640045394179604, 'fmeasure': 0.8774014546489907}}
 # {'VOS': {'mae': 0.07308082925115635, 'fmeasure': 0.761926607316529}}
 # {'UVSD': {'mae': 0.03607475861206765, 'fmeasure': 0.7011512131755825}}
+# {'DAVSOD': {'fmeasure': 0.5845565863898012, 'mae': 0.09428676452230018}}
 
 # VideoSaliency_2019-06-27 00:56:18 traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
 # finetune VideoSaliency_2019-06-26 00:07:16 model:resnext101 + R3Net + no motion block + motion enhancement
@@ -255,3 +260,28 @@ print (results)
 # {'davis': {'fmeasure': 0.8739062844885623, 'mae': 0.03299489011624521}}
 # {'FBMS': {'fmeasure': 0.8381842471006478, 'mae': 0.058207687328754}}
 
+# VideoSaliency_2019-08-08 18:04:10 traning from original resnet101 model of torch parameter, using dataset:DUT-TR + DAVIS
+# model:resnet101 + DSS
+# {'davis': {'fmeasure': 0.8483, 'mae': 0.03583}}
+
+# VideoSaliency_2019-08-08 23:13:19 traning from original resnet101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
+# finetune VideoSaliency_2019-08-08 18:04:10;  model:resnet101 + DSS + MEN
+# {'davis': {'fmeasure': 0.8483, 'mae': 0.03472}}
+
+# VideoSaliency_2019-08-09 23:13:08 traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + PAM(self attention)
+# {'davis': {'fmeasure': 0.8801, 'mae': 0.02831}} 30000
+# {'davis': {'fmeasure': 0.8840, 'mae': 0.02761}} 20000
+
+
+# VideoSaliency_2019-08-11 05:19:41 traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.8834, 'mae': 0.02841}} 30000
+# {'davis': {'fmeasure': 0.8873, 'mae': 0.02731}} 25000
+# {'davis': {'fmeasure': 0.8871, 'mae': 0.02630}} 20000
+# {'davis': {'fmeasure': 0.8843, 'mae': 0.02849}} 10000
+
+# VideoSaliency_2019-08-11 19:39:25 traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.8829, 'mae': 0.02765}} 30000
+# {'davis': {'fmeasure': 0.8859, 'mae': 0.02593}} 20000

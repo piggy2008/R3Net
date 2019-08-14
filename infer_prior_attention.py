@@ -23,7 +23,7 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency_2019-08-14 05:09:14'
 
 args = {
-    'snapshot': '20000',  # your snapshot filename (exclude extension name)
+    'snapshot': '25000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -35,17 +35,17 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-# gt_root = os.path.join(davis_path, 'GT')
-# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+gt_root = os.path.join(davis_path, 'GT')
+imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
 # imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
 
-to_test = {'MCL': os.path.join(mcl_path, 'MCL_test')}
-gt_root = os.path.join(mcl_path, 'GT')
-imgs_path = os.path.join(mcl_path, 'MCL_test_5f.txt')
+# to_test = {'MCL': os.path.join(mcl_path, 'MCL_test')}
+# gt_root = os.path.join(mcl_path, 'GT')
+# imgs_path = os.path.join(mcl_path, 'MCL_test_5f.txt')
 
 # to_test = {'UVSD': os.path.join(uvsd_path, 'UVSD_test')}
 # gt_root = os.path.join(uvsd_path, 'GT')

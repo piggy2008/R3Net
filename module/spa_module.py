@@ -43,8 +43,8 @@ class STA_Module(nn.Module):
         super(STA_Module, self).__init__()
         self.chanel_in = in_dim
 
-        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim//4, kernel_size=1)
-        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim//4, kernel_size=1)
+        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
+        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
         self.value_conv_spatial = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
         self.value_conv_temporal = nn.Conv2d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
         # self.out_fuse = nn.Conv2d(in_channels=in_dim * 2, out_channels=in_dim, kernel_size=1)
@@ -63,6 +63,7 @@ class STA_Module(nn.Module):
         proj_query = self.query_conv(x_spatial).view(m_batchsize, -1, width*height).permute(0, 2, 1)
         proj_key = self.key_conv(x_temporal).view(m_batchsize, -1, width*height)
         energy = torch.bmm(proj_query, proj_key)
+        energy = ((self.chanel_in // 8) ** -.5) * energy
         attention = F.softmax(energy, dim=-1)
 
         proj_value = self.value_conv_spatial(x_spatial).view(m_batchsize, -1, width*height)
@@ -77,6 +78,7 @@ class STA_Module(nn.Module):
         # out2 = self.gamma2*out2 + x_temporal
         # out = self.gamma*out + x_spatial + self.gamma2*out2 + x_temporal
         out = out + x_spatial + out2 + x_temporal
+        # out = out + out2
         # out = self.gamma * out + self.gamma2 * out2
         # out = self.out_fuse(torch.cat([out, out2], dim=1))
         return out

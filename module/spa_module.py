@@ -63,7 +63,7 @@ class STA_Module(nn.Module):
         proj_query = self.query_conv(x_spatial).view(m_batchsize, -1, width*height).permute(0, 2, 1)
         proj_key = self.key_conv(x_temporal).view(m_batchsize, -1, width*height)
         energy = torch.bmm(proj_query, proj_key)
-        # energy = ((self.chanel_in // 8) ** -.5) * energy
+        energy = ((self.chanel_in // 8) ** -.5) * energy
         attention = F.softmax(energy, dim=-1)
 
         proj_value = self.value_conv_spatial(x_spatial).view(m_batchsize, -1, width*height)

@@ -36,13 +36,13 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-# gt_root = os.path.join(davis_path, 'GT')
-# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+gt_root = os.path.join(davis_path, 'GT')
+imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 
-to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
-gt_root = os.path.join(fbms_path, 'GT')
-imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
+# to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
+# gt_root = os.path.join(fbms_path, 'GT')
+# imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
 
 # to_test = {'MCL': os.path.join(mcl_path, 'MCL_test')}
 # gt_root = os.path.join(mcl_path, 'GT')

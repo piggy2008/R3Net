@@ -15,12 +15,12 @@ from utils import MaxMinNormalization
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-15 19:37:15'
+exp_name = 'VideoSaliency_2019-08-16 05:20:27'
 
 # VideoSaliency_2019-08-15 05:22:35
 args = {

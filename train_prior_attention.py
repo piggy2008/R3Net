@@ -38,7 +38,7 @@ args = {
     'sta': True,
     'iter_num': 10000,
     'iter_save': 2500,
-    'train_batch_size': 1,
+    'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-10,
     'lr_decay': 0.95,

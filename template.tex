@@ -1,0 +1,61 @@
+\title{Video salient objects detection via inter-frame motion feature enhancement}
+\author{
+        Vitaly Surazhsky \\
+                Department of Computer Science\\
+        Technion---Israel Institute of Technology\\
+        Technion City, Haifa 32000, \underline{Israel}
+            \and
+        Yossi Gil\\
+        Department of Computer Science\\
+        Technion---Israel Institute of Technology\\
+        Technion City, Haifa 32000, \underline{Israel}
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Since the employment of deep learning model in video salient detection, the accuracy and efficiency of the recent approaches have reached a very high level. However, as for the exploration of motion features and spatiotemporal fusion, these still exists scope for improvement. In this paper, we propose a densely motion feature enhancement network for video salient object detection. Firstly, a densely motion feature enhancement module is employed to solve improve the robustness of inter-frame motion features. In this module, we refine the motion features by dense integration of infer-frame deep features and historic salieny supervision. After that, to explore the spatiotemporal contextual relationship, we propose a sptiotemporal cross-attention block, which selectively integrates the both spatial and temporal features by computing the weights of these features. The experiments demonstrate that our approach has the competitive performances on 7 widely used datasets, i.e. ViSal, SegTrack and VOS. Meanwhile, the proposed network is an end-to-end framework without extra supplementary in both training and testing phases. As for the community of unsupervised video object segmentation, we also achieve the competitive results DAVIS dataset against the state-of-the-arts. 
+\end{abstract}
+
+\section{Introduction}
+The purpose of salient object detection (SOD) is to focus on the most attractive objects or regions in an image or video and then highlight them from the complex background. As the trait of this community, it usually is treated as the pre-processing to support other visual tasks, such as visual tracking, image retrieval and action recognition. According to the input of frameworks, SOD can be categoried into image salient object detection and video salient object detection. In this paper, our research emphasizes on the more complex video salient object detection.
+
+The development of video saliency approaches can be divided into two stages. The first stage is based on hand-crafted features and some heuristics \cite{xxx}. As the shoratage of robust motion features and efficient spatiotemporal models, these methods are not able to handle complex video scenes, such as motion blur, low contrast and so on. With the employment of deep learning models, especially fully convolutional networks (FCNs)\cite{xxx}, the accuracy and efficiency of this field have achieved a top level. Moreover, the recent approaches, PDB \cite{xxx} and SSAV \cite{xxx}, outperform previous methods with a largin margin, by using the dilated convolutions and LSTM-based module to extract the robust spatiotemporal features. Under this kind of senario, to improve the accuracy on these approaches, we need to further refine the motion features and explore the relationship between spatial and temporal information.
+
+Through the analysis of the intermediate results in deep FCN model, we notice that there exists the fluctuation of feature values between two consecutive frames in few video sequences. As shown in Fig.\ref{results}, the first row is the consecutive input frames. The second row and the third row are the energy visualization of the corresponding intermediate feature maps and final saliency maps (with sigmoid activation), respectively. Compared with colar bar beside the energy visualization, the feature values of the second frame is obviously smaller than the first ones. Moreover, some feature values are less than one, which leads to the loss of the salient object in the saliency map.  
+
+Notice the previous the state-of-the-arts (i.e., PDB and SSAV), their frameworks consists of spatial learning block and temporal learning block. The former one is to extract the static features in an single frame, the latter one is to refine the dynamic features after the spatial learning block. This kind of framework is efficient and can extract robust spatiotemporal features, but it still does not fully explore the contextual dependencies between spatial and temporal features, which is able to produce more robust fusing spatotemporal features and further improve the quality of saliency maps.
+
+In this paper, we propose an end-to-end deep framework, called densely motion feature enhancement network (MEN). Observed by the fluctuation of feature values in Fig.\ref{results}, we try to exploit the features of previous frame to aggregate the current ones. Therefore, an inter-frame motion features enhancement module is introduced to refine the motion information. In this module, the recursively aggregated feature maps and historic saliency supervision are employed to provide sufficient motion information for current frame. Besides, to explore the contextual dependencies between the spatial and temporal features, we introduce a sptiotemporal cross-attention block. Inspired by position attention in \cite{}, the proposed attention block generates the weight of feature by any positions with similar features from both spatial and temporal information. Togethter with motion features enhancement module, our MEN is able to effetively revise the fluctuation situation and produce more robust spatiotemporal feature for video saliency estiamtion.
+
+In summary, this paper can conclude the following contributions:
+
+\begin{itemize}
+  \item We proposed a end-to-end densely motion feature enhancement network, without any extra supplementary information in training and testing stage. Additionally, this approach achieve competitive performance in the field of video salient object detection (VSOD) and unsupervised video object segmentation (UVOS). 
+  \item We introduce an inter-frame motion features enhancement module, which refines the motion features by the recursively aggregated feature maps and historic saliency supervision.
+  \item To fully exploit the spatitemporal information and explore their contextual dependencies, a spatiotemporal cross-attention block is proposed to combine the spatial and temporal information together.	  
+\end{itemize}
+  
+\paragraph{Outline}
+The remainder of this article is organized as follows.
+Section~\ref{previous work} gives account of previous work.
+Our new and exciting results are described in Section~\ref{results}.
+Finally, Section~\ref{conclusions} gives the conclusions.
+
+\section{Previous work}\label{previous work}
+A much longer \LaTeXe{} example was written by Gil~\cite{Gil:02}.
+
+\section{Results}\label{results}
+In this section we describe the results.
+
+\section{Conclusions}\label{conclusions}
+We worked hard, and achieved very little.
+
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}

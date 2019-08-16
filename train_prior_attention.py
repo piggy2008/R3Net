@@ -45,13 +45,13 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-08-15 05:22:35', '20000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-08-15 05:22:35', '15000.pth'),
     # 'pretrain': '',
-    # 'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
-    'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
-    # 'train_loader': 'video_image',
-    'train_loader': 'video_sequence',
-    'shuffle': True
+    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
+    # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
+    'train_loader': 'video_image',
+    # 'train_loader': 'video_sequence',
+    'shuffle': False
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
@@ -106,7 +106,7 @@ def main():
                       attention=args['attention'], pre_attention=args['pre_attention'],
                       isTriplet=args['isTriplet'], basic_model=args['basic_model'], sta=args['sta']).cuda().train()
 
-    fix_parameters(net.named_parameters())
+    # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
         {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
          'lr': 2 * args['lr']},

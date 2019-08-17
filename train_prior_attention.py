@@ -51,7 +51,7 @@ args = {
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     'train_loader': 'video_image',
     # 'train_loader': 'video_sequence',
-    'shuffle': False
+    'shuffle': True
 }
 
 imgs_file = os.path.join(datasets_root, args['imgs_file'])

@@ -15,16 +15,16 @@ from utils import MaxMinNormalization
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(2)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-17 04:51:47'
+exp_name = 'VideoSaliency_2019-08-17 06:03:46'
 
 # VideoSaliency_2019-08-15 05:22:35
 args = {
-    'snapshot': '2500',  # your snapshot filename (exclude extension name)
+    'snapshot': '5000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)

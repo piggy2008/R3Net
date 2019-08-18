@@ -15,7 +15,7 @@ from utils import MaxMinNormalization
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
@@ -72,7 +72,7 @@ def main():
     net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
-    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
+    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:2'))
     net.eval()
     net.cuda()
     results = {}

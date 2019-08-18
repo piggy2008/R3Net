@@ -20,11 +20,11 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-17 19:47:15'
+exp_name = 'VideoSaliency_2019-08-18 05:45:28'
 
 # VideoSaliency_2019-08-15 05:22:35
 args = {
-    'snapshot': '10000',  # your snapshot filename (exclude extension name)
+    'snapshot': '5000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -36,10 +36,10 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
-
+# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+# gt_root = os.path.join(davis_path, 'GT')
+# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+#
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
 # imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
@@ -64,9 +64,9 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # gt_root = os.path.join(segtrack_path, 'GT')
 # imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_5f.txt')
 
-# to_test = {'DAVSOD': os.path.join(davsod_path, 'DAVSOD_test')}
-# gt_root = os.path.join(davsod_path, 'GT')
-# imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
+to_test = {'DAVSOD': os.path.join(davsod_path, 'DAVSOD_test')}
+gt_root = os.path.join(davsod_path, 'GT')
+imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
 
 def main():
     net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)

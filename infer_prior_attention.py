@@ -36,9 +36,9 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-# gt_root = os.path.join(davis_path, 'GT')
-# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+gt_root = os.path.join(davis_path, 'GT')
+imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 #
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
@@ -64,9 +64,9 @@ to_pil = transforms.ToPILImage()
 # gt_root = os.path.join(segtrack_path, 'GT')
 # imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_5f.txt')
 
-to_test = {'DAVSOD': os.path.join(davsod_path, 'DAVSOD_test')}
-gt_root = os.path.join(davsod_path, 'GT')
-imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
+# to_test = {'DAVSOD': os.path.join(davsod_path, 'DAVSOD_test')}
+# gt_root = os.path.join(davsod_path, 'GT')
+# imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
 
 def main():
     net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)

@@ -1,3 +1,5 @@
+\usepackage{comment}
+
 \title{Video salient objects detection via inter-frame motion feature enhancement}
 \author{
         Vitaly Surazhsky \\
@@ -39,15 +41,204 @@ In summary, this paper can conclude the following contributions:
   \item We introduce an inter-frame motion features enhancement module, which refines the motion features by the recursively aggregated feature maps and historic saliency supervision.
   \item To fully exploit the spatitemporal information and explore their contextual dependencies, a spatiotemporal cross-attention block is proposed to combine the spatial and temporal information together.	  
 \end{itemize}
-  
-\paragraph{Outline}
-The remainder of this article is organized as follows.
-Section~\ref{previous work} gives account of previous work.
-Our new and exciting results are described in Section~\ref{results}.
-Finally, Section~\ref{conclusions} gives the conclusions.
+ 
 
-\section{Previous work}\label{previous work}
-A much longer \LaTeXe{} example was written by Gil~\cite{Gil:02}.
+\section{Related Work}
+\subsection{Video salient object detection}
+
+With the introduction of deep learning methods, we can divide prvious video saliency approaches into two phases, which are non-deep learning approaches and deep learning-based approaches. The formers are based on hand-crafted features (e.g., color contrast, texture, optical flow) and heuristic models (e.g., gesidesc distance, center-surround contrast). As the exploitation of optical flow and optimization models, these approaches are usually time-consuming. Moreover, they also cannot conduct the complex video scenes such as motion blur, low contrast, occlusion, because of the limitation of hand-crafted features. With the success of deep learning in many visual tasks, this community also starts to widely use deep learning \cite{A,B,C,D,F}. At the beginning, as the shortage of training data, weakly supervised method \cite{scnn} and data synthetic \cite{fcn} are employed to supply pixel-wise labels. In the aspect of deep saliency models, dilated convolutions and LSTM-based structures are introduced to retain sufficient feature scale and extract motion information, respectively. For example, PDB \cite{pdb} extracts spatial features by pyramid dilated convolutions and obtains temporal features by deeper bi-directional ConvLSTM structure. Based on PDB, SSAV \cite{ssav} further introduces eye fixation records for network training and proposes a saliency-shift-aware convLSTM module to capture video saliency dynamics. Additionally, DLVS \cite{scnn} proposes a saliency detection network by stepwise extracting the static and dynamic information. Li et al. \cite{fgrne} subtly combines optical flow and short connection structure \cite{dss} to propose a flow guided recurrent neural encoder framework. SCOM \cite{scom} and STCR \cite{scom} build different optimization models, but the employment of deep features make them achieve good performances. 
+
+\subsection{Unsupervised video object segmentation}
+
+Video saliency detection is very similar with Unsupervised video segmentation. The former one is to generate the probability value of each pixel in video frames, the latter one is to classify each pixel. Like the development of video saliency, early video segmentations mainly integrates hand-carfted features and heuristics, which include clustering \cite{keuper2015motion,brox2010object,chang2013video}, objectness \cite{lee2011key,ma2012maximum,koh2017primary,li2018instance} and saliency guidance \cite{hu2018unsupervised,wang2015consistent,wang2015robust}. As the limiting robustness of hand-crafted features and the low speed of optical flow extraction, these approaches have gradually reached the bottleneck. To obtain more robust spatiotemporal features, recent works begin to build their frameworks with convolutional neural networks (CNNs). FusionSeg \cite{jain2017fusionseg} proposes a two-stream framework, which extracts spatial and temporal cues, respectively. In \cite{perazzi2017learning,Tokmakov_2017_CVPR,Cheng_2017_ICCV}, optical flow is widely used to extract motion information for video segmentation. Further, FGRNE \cite{fgrne} incorporate LSTM and optical flow to generate robust motion features. Latest, AGS \cite{AGS} collects UVOS-aware human attention data and then train the attention-guided object segmentation network with this kind of data. In this paper, we also treat video segmentation as an extra validation task, which proves our approache is feasible in this community.  
+
+\subsection{Visual attention}
+
+Attention mechanism is to compute the weights from different and complex information. It usually is used for selecting and fusing features in many visual tasks, such as natural language processing \cite{lin2017structured, vaswani2017attention}, image caption \cite{chen2017sca,lu2016hierarchical}, image segmentaion \cite{fu2019dual,yuan2018ocnet}, etc. In particular, the work \cite{yuan2018ocnet} proposes an object context pooling scheme by exploiting self-attention module, whose principle is to compute similarites of all pixels and them selectively integrates them. DANet \cite{fu2019dual} further propose two kinds of attention modules: position attention module (PAM) and channel attention module (CAM). The two modules can explore the contextual dependencies in FCN framework. Inspired by their PAM, we build a cross-attention module to extract the contextual information in spatial and temporal cues. 
+
+\section{Densely motion feature enhancement network}
+
+\subsection{Overview}
+
+The proposed framwork mainly consists of four components. It includes backbone network, initial motion extraction, inter-frame motion features enhancement module and spatiotemporal cross-attention block. Given the video frames, the spatial features are firstly extracted by the backbone network. Here, to fully exploit the multi-scale features, we follow the feature encoding method \cite{fu2019dual}
+
+
+\begin{comment}	
+@inproceedings{fu2019dual,
+  title={Dual attention network for scene segmentation},
+  author={Fu, Jun and Liu, Jing and Tian, Haijie and Li, Yong and Bao, Yongjun and Fang, Zhiwei and Lu, Hanqing},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={3146--3154},
+  year={2019}
+}
+
+@article{yuan2018ocnet,
+  title={Ocnet: Object context network for scene parsing},
+  author={Yuan, Yuhui and Wang, Jingdong},
+  journal={arXiv preprint arXiv:1809.00916},
+  year={2018}
+}
+
+@inproceedings{vaswani2017attention,
+  title={Attention is all you need},
+  author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  booktitle={Advances in neural information processing systems},
+  pages={5998--6008},
+  year={2017}
+}
+@article{lin2017structured,
+  title={A structured self-attentive sentence embedding},
+  author={Lin, Zhouhan and Feng, Minwei and Santos, Cicero Nogueira dos and Yu, Mo and Xiang, Bing and Zhou, Bowen and Bengio, Yoshua},
+  journal={arXiv preprint arXiv:1703.03130},
+  year={2017}
+}
+
+@inproceedings{fu2017look,
+  title={Look closer to see better: Recurrent attention convolutional neural network for fine-grained image recognition},
+  author={Fu, Jianlong and Zheng, Heliang and Mei, Tao},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={4438--4446},
+  year={2017}
+}
+@inproceedings{lu2016hierarchical,
+  title={Hierarchical question-image co-attention for visual question answering},
+  author={Lu, Jiasen and Yang, Jianwei and Batra, Dhruv and Parikh, Devi},
+  booktitle={Advances In Neural Information Processing Systems},
+  pages={289--297},
+  year={2016}
+}
+@inproceedings{chen2017sca,
+  title={Sca-cnn: Spatial and channel-wise attention in convolutional networks for image captioning},
+  author={Chen, Long and Zhang, Hanwang and Xiao, Jun and Nie, Liqiang and Shao, Jian and Liu, Wei and Chua, Tat-Seng},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={5659--5667},
+  year={2017}
+}
+
+@inproceedings{keuper2015motion,
+  title={Motion trajectory segmentation via minimum cost multicuts},
+  author={Keuper, Margret and Andres, Bjoern and Brox, Thomas},
+  booktitle={Proceedings of the IEEE International Conference on Computer Vision},
+  pages={3271--3279},
+  year={2015}
+}
+
+@inproceedings{brox2010object,
+  title={Object segmentation by long term analysis of point trajectories},
+  author={Brox, Thomas and Malik, Jitendra},
+  booktitle={European conference on computer vision},
+  pages={282--295},
+  year={2010},
+  organization={Springer}
+}
+
+@inproceedings{chang2013video,
+  title={A video representation using temporal superpixels},
+  author={Chang, Jason and Wei, Donglai and Fisher, John W},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={2051--2058},
+  year={2013}
+}
+
+@inproceedings{lee2011key,
+  title={Key-segments for video object segmentation},
+  author={Lee, Yong Jae and Kim, Jaechul and Grauman, Kristen},
+  booktitle={2011 International conference on computer vision},
+  pages={1995--2002},
+  year={2011},
+  organization={IEEE}
+}
+
+@inproceedings{koh2017primary,
+  title={Primary object segmentation in videos based on region augmentation and reduction},
+  author={Koh, Yeong Jun and Kim, Chang-Su},
+  booktitle={2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages={7417--7425},
+  year={2017},
+  organization={IEEE}
+}
+
+@inproceedings{ma2012maximum,
+  title={Maximum weight cliques with mutex constraints for video object segmentation},
+  author={Ma, Tianyang and Latecki, Longin Jan},
+  booktitle={2012 IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={670--677},
+  year={2012},
+  organization={IEEE}
+}
+
+@inproceedings{li2018instance,
+  title={Instance embedding transfer to unsupervised video object segmentation},
+  author={Li, Siyang and Seybold, Bryan and Vorobyov, Alexey and Fathi, Alireza and Huang, Qin and Jay Kuo, C-C},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={6526--6535},
+  year={2018}
+}
+
+@article{wang2015robust,
+  title={Robust video object cosegmentation},
+  author={Wang, Wenguan and Shen, Jianbing and Li, Xuelong and Porikli, Fatih},
+  journal={IEEE Transactions on Image Processing},
+  volume={24},
+  number={10},
+  pages={3137--3148},
+  year={2015},
+  publisher={IEEE}
+}
+
+@article{wang2015consistent,
+  title={Consistent video saliency using local gradient flow optimization and global refinement},
+  author={Wang, Wenguan and Shen, Jianbing and Shao, Ling},
+  journal={IEEE Transactions on Image Processing},
+  volume={24},
+  number={11},
+  pages={4185--4196},
+  year={2015},
+  publisher={IEEE}
+}
+
+@inproceedings{hu2018unsupervised,
+  title={Unsupervised video object segmentation using motion saliency-guided spatio-temporal propagation},
+  author={Hu, Yuan-Ting and Huang, Jia-Bin and Schwing, Alexander G},
+  booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
+  pages={786--802},
+  year={2018}
+}
+
+@inproceedings{jain2017fusionseg,
+  title={Fusionseg: Learning to combine motion and appearance for fully automatic segmentation of generic objects in videos},
+  author={Jain, Suyog Dutt and Xiong, Bo and Grauman, Kristen},
+  booktitle={2017 IEEE conference on computer vision and pattern recognition (CVPR)},
+  pages={2117--2126},
+  year={2017},
+  organization={IEEE}
+}
+
+@inproceedings{perazzi2017learning,
+  title={Learning video object segmentation from static images},
+  author={Perazzi, Federico and Khoreva, Anna and Benenson, Rodrigo and Schiele, Bernt and Sorkine-Hornung, Alexander},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={2663--2672},
+  year={2017}
+}
+
+@InProceedings{Tokmakov_2017_CVPR,
+author = {Tokmakov, Pavel and Alahari, Karteek and Schmid, Cordelia},
+title = {Learning Motion Patterns in Videos},
+booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+month = {July},
+year = {2017}
+}
+
+@InProceedings{Cheng_2017_ICCV,
+author = {Cheng, Jingchun and Tsai, Yi-Hsuan and Wang, Shengjin and Yang, Ming-Hsuan},
+title = {SegFlow: Joint Learning for Video Object Segmentation and Optical Flow},
+booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+month = {Oct},
+year = {2017}
+}
+
+\end{comment}
 
 \section{Results}\label{results}
 In this section we describe the results.

@@ -43,7 +43,7 @@ args = {
     'snapshot': '',
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth'),
     'pretrain': '',
-    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
+    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
     'train_loader': 'video_image'
     # 'train_loader': 'video_sequence'

@@ -1,4 +1,4 @@
-\usepackage{comment}
+
 
 \title{Video salient objects detection via inter-frame motion feature enhancement}
 \author{
@@ -15,7 +15,8 @@
 \date{\today}
 
 \documentclass[12pt]{article}
-
+\usepackage{comment}
+\usepackage{amsmath,bm}
 \begin{document}
 \maketitle
 
@@ -60,10 +61,103 @@ Attention mechanism is to compute the weights from different and complex informa
 
 \subsection{Overview}
 
-The proposed framwork mainly consists of four components. It includes backbone network, initial motion extraction, inter-frame motion features enhancement module and spatiotemporal cross-attention block. Given the video frames, the spatial features are firstly extracted by the backbone network. Here, to fully exploit the multi-scale features, we follow the feature encoding method \cite{fu2019dual}
+The proposed framwork mainly consists of four components. As shown in Fig.\ref{framework}, it includes backbone network, initial motion extractor, inter-frame motion features enhancement module and spatiotemporal cross-attention block. Given the video frames, the spatial features are firstly extracted by the backbone network. Here, to fully exploit the multi-scale features, we follow the feature encoding method \cite{fu2019dual} to merge the feature maps from the last two convlutional blocks of ResNeXt. The merged feature maps are fed into the atrous spatial pyramid pooling module (ASPP) \cite{chen2017rethinking} to refine spatial features. After that, we choose a convGRU layer as the initial motion feature extractor, because its parameters are less and it is able to use a small amount of data to complete training. Next, the initial motion features can be recursively aggregated by the proposed motion feature enhancement module. Additionally, to incorporate the spatial and temporal features, the cross-attention block is embedding after the initial motion extractor. At the top of the framework, the genrated saliency maps are used to compute the loss with the ground truths by sigmoid cross-entropy function, thus optimizing the whole neural network.  
 
+\subsection{Motion feature enhancement}
 
-\begin{comment}	
+To solve the fluctuation of feature values in consecutive frames, we propose the inter-frame motion feature enhancement module, which straightforward yet effective. The main idea of this module is to recursively aggregate feature maps and to exploit the historic saliency guidance. Specifically, given the consecutive feature maps $\{..., M_{t-1}, M_{t}, M_{t+1}, ...\}$ from the initial motion extractor, the current feature maps $M_{t}$ are directly added by the previous ones $M_{t-1}$, thus generating the enhanced features $E_{t}$. Meanwhile, inspire by \cite{deng2018r3net}, we introduce a saliency guidance block, which treats the historic saliency maps as an extra supervision information $A_t$ to guide the network learning. The whole process of the motion feature enhancement can be formulated as follows:  
+
+\begin{equation}
+\label{enhance}
+\begin{aligned}
+   P_{t}  &= \Gamma(Cat(E_{t}, A_{t-1});W_m) \\
+   E_{t}  &= M_{t-1} + M_{t} \\
+   A_{t-1}  &= G(P_0, ..., P_{t-2};W_s); t \in \bm{N_{+}}
+\end{aligned}
+\end{equation} where $P_{t}$ and $E_{t}$ and final saliency prediction and enhanced feature maps of current frame. $A_{t-1}$ represents the historic saliency supervision of previous frames. $\Gamma(\cdot; \cdot)$ denotes a group of convolutional operations, which include three standard convolution layers with batch normalization and PReLU activation. Their corresponding convolutional kernals are $3 \times 3$, $3 \times 3$ and $1 \times 1$, respectively. $G(\cdot; \cdot)$ is the squeeze-and-excitation operation \cite{hu2018squeeze}, which is detailedly described later. $W_m$ and $W_s$ are the learnable parameters. 
+
+Historic saliency supervision. Inspired by \cite{deng2018r3net} and \cite{wang2016saliency}, the saliency results can be regarded as a supervision signal to guide the nework learning. In this module, to fully exploit the sequantial information of the consecutive saliency maps, we introduce the squeeze-and-excitation operation to integrate them. The operation $G(\cdot; \cdot)$ can be described as below. Firstly, an average pooling is used to squeeze the feature maps $\{P_1, P_2 ..., P_{i-1}\}$ in the saliency guided block: 
+
+\begin{equation}
+\label{sq}
+\begin{aligned}
+   z_{c} =f_{sq}(P_c) = \frac{1}{H \times W} \sum\limits_{i=1}^{H} \sum\limits_{j=1}^{W} P_c; c &\in \{0,1,...,t-1\}
+ \end{aligned}
+\end{equation} where the historic saliency maps $P_c \in R^{C \times W \times H}$ are converted into the $z_c \in R^{C}$. Then, two fully connected layers (FC) are employed to learn the nonlinear interaction between channels. This process can be written as below:
+
+\begin{equation}
+\label{ex}
+\begin{aligned}
+   s = f_{ex}(\bm{z}, \textbf{W}) = \sigma(g(\bm{z}, \bm{W})) = \sigma(\bm{W_2}\delta(\bm{W_1}\bm{z}))
+ \end{aligned}
+\end{equation} $s$ is the learned weight vector. The whole excitation can be unfolded into two FCs. $\bm{W_1} \in R^{\frac{C}{r}\times C} $ and $\bm{W_2} \in R^{C\times \frac{C}{r}} $ represent the their parameters, where $r$ is the reduction rate. $\sigma(\cdot)$ and $\delta(\cdot)$ demonstrate ReLU and sigmoid activation, respectively. After that, the weighted feature maps can be obtained by a channel-wise multiplication ($f_{s}(\cdot)$ in Eg.\ref{scale}). Finally, the weighted feature maps are weighed sum up to the supervision to guide the learning of next frame with the Eq.\ref{sum_scale}.
+
+\begin{equation}
+\label{scale}
+\begin{aligned}
+   \bm{\tilde{P}_c} = f_{s}(\bm{P}_c, s_c) = s_c \cdot \textbf{P}_c
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+\label{sum_scale}
+\begin{aligned}
+   A_i = \sum\limits_{c=1}^{t-1}\tilde{P}_c
+ \end{aligned}
+\end{equation}
+ 
+\subsection{Cross-attention block} 
+
+This block is embedded between the initial motion feature extractor and motion feature enhancement module. Its purpose is to explore the contextual relationship between spatial and temporal features. The specific process is shown in Fig.\ref{sta}. The input of this block comes from the backbone network and initial motion feature extractor, which represent the spatial $I_s \in R^{C \times W \times H}$ and temporal features $I_t \in R^{C \times W \times H}$, respectively. The spatial features are used to generate a query feature maps $Q_s$ by a convolution layer (1 $\times$ 1 kernel). Then, the query feature maps are reshaped to $R^{C \times N}$, where $N = W \times H $. Meanwhile, the temporal feature maps are converted to a key feature maps $K_t \in R^{N \times C}$. After that, the transpose of $Q_s$ is multiplied by $K_t$, thus generating the attention map $O \in R^{N \times N}$ by a softmax activation.
+
+\begin{equation}
+\label{sta}
+\begin{aligned}
+   o_{ji} = \frac{exp(q_i \cdot k_j)}{\sum_{i=1}^{N}exp(q_i \cdot k_j)}
+ \end{aligned}
+\end{equation} where $q_i$ and $k_j$ are the values in $Q_s$ and $K_t$, respectively. $o_{ji} \in O$ denotes the learn weight of i-th position in spatial features and j-th position in temporal features. Finally, the value feature maps ($V_s and V_t$) of spatial and temporal features are generated by two convolution layers and then reshaped to $R^{C \times N}$. The fusing spatiotemporal features $F$ are produced by the formula as follows:
+
+\begin{equation}
+\label{sta}
+\begin{aligned}
+   F = Re(O \cdot V_s)+ I_s + Re(O \cdot V_t)+ I_t 
+ \end{aligned}
+\end{equation} where $Re(\cdot)$ is the reshape operation, which turns the result of matrix multiplication between learned weight and valure feature maps ($V_s$ and $V_t$ ) back to $R^{C \times W \times H}$. Then, an element-wise addition is employed to fuse all these feature maps.
+ 
+\begin{comment}
+@inproceedings{wang2016saliency,
+  title={Saliency detection with recurrent fully convolutional networks},
+  author={Wang, Linzhao and Wang, Lijun and Lu, Huchuan and Zhang, Pingping and Ruan, Xiang},
+  booktitle={European conference on computer vision},
+  pages={825--841},
+  year={2016},
+  organization={Springer}
+}
+
+@inproceedings{hu2018squeeze,
+  title={Squeeze-and-excitation networks},
+  author={Hu, Jie and Shen, Li and Sun, Gang},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={7132--7141},
+  year={2018}
+}
+
+@article{chen2017rethinking,
+  title={Rethinking atrous convolution for semantic image segmentation},
+  author={Chen, Liang-Chieh and Papandreou, George and Schroff, Florian and Adam, Hartwig},
+  journal={arXiv preprint arXiv:1706.05587},
+  year={2017}
+}
+
+@inproceedings{deng2018r3net,
+  title={R3Net: Recurrent residual refinement network for saliency detection},
+  author={Deng, Zijun and Hu, Xiaowei and Zhu, Lei and Xu, Xuemiao and Qin, Jing and Han, Guoqiang and Heng, Pheng-Ann},
+  booktitle={Proceedings of the 27th International Joint Conference on Artificial Intelligence},
+  pages={684--690},
+  year={2018},
+  organization={AAAI Press}
+}
+	
 @inproceedings{fu2019dual,
   title={Dual attention network for scene segmentation},
   author={Fu, Jun and Liu, Jing and Tian, Haijie and Li, Yong and Bao, Yongjun and Fang, Zhiwei and Lu, Hanqing},

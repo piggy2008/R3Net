@@ -4,7 +4,7 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-11 05:19:41'
+exp_name = 'VideoSaliency_2019-08-21 17:57:19'
 name = 'davis'
 root = '/home/ty/data/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'
@@ -285,3 +285,12 @@ print (results)
 # finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
 # {'davis': {'fmeasure': 0.8829, 'mae': 0.02765}} 30000
 # {'davis': {'fmeasure': 0.8859, 'mae': 0.02593}} 20000
+
+# VideoSaliency_2019-08-18 05:45:28 traning from original resnext101 model of torch parameter, using dataset:DUT-OMRON + DAVIS
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'DAVSOD': {'fmeasure': 0.5875760813843472, 'mae': 0.09476998692081383}} 20000
+# {'SegTrackV2': {'mae': 0.02389494685134959, 'fmeasure': 0.8824181699450439}}
+# {'VOS': {'mae': 0.07287949195973144, 'fmeasure': 0.7635497228309376}}
+# {'ViSal': {'mae': 0.015052299736749774, 'fmeasure': 0.9492640942370092}}
+# {'UVSD': {'fmeasure': 0.6981638464285685, 'mae': 0.037293701491150306}}
+# {'MCL': {'fmeasure': 0.7802265038605428, 'mae': 0.034676702495845035}}

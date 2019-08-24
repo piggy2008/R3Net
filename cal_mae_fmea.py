@@ -4,7 +4,7 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-19 18:07:15'
+exp_name = 'VideoSaliency_2019-08-15 05:22:35'
 name = 'davis'
 root = '/home/ty/data/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'

@@ -15,15 +15,15 @@ from utils import MaxMinNormalization
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(1)
+torch.cuda.set_device(2)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-19 18:07:15'
+exp_name = 'VideoSaliency_2019-08-19 05:36:03'
 
 args = {
-    'snapshot': '10000',  # your snapshot filename (exclude extension name)
+    'snapshot': '25000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -63,10 +63,10 @@ imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
 # imgs_path = os.path.join(mcl_path, 'MCL_test_single.txt')
 
 def main():
-    net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet101')
+    net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet50')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
-    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:1'))
+    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:2'))
     net.eval()
     net.cuda()
     results = {}

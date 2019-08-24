@@ -12,7 +12,7 @@ gt_root = '/home/ty/data/davis/GT'
 # gt_root = '/home/qub/data/saliency/MCL/GT'
 # gt_root = '/home/qub/data/saliency/VOS/GT'
 args = {
-    'snapshot': '20000',  # your snapshot filename (exclude extension name)
+    'snapshot': '15000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }

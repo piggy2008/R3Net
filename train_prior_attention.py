@@ -19,7 +19,7 @@ import time
 from utils import load_part_of_model
 
 cudnn.benchmark = True
-device_id = 2
+device_id = 0
 torch.manual_seed(2019)
 torch.cuda.set_device(device_id)
 
@@ -28,10 +28,10 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 # VideoSaliency_2019-05-01 23:29:39 and VideoSaliency_2019-04-20 23:11:17/30000.pth
 args = {
-    'basic_model': 'resnext50',
+    'basic_model': 'resnet101',
     'motion': 'GRU',
     'se_layer': False,
-    'attention': True,
+    'attention': False,
     'pre_attention': True,
     'isTriplet': False,
     'L2': False,
@@ -45,7 +45,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.95,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-07-02 04:21:40', '30000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-06-28 22:46:18', '30000.pth'),
     # 'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',

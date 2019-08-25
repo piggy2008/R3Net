@@ -40,7 +40,7 @@ args = {
     'iter_save': 5000,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-9,
+    'lr': 1e-5,
     'lr_decay': 0.95,
     'weight_decay': 5e-4,
     'momentum': 0.95,

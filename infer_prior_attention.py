@@ -15,16 +15,16 @@ from utils import MaxMinNormalization
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(2)
+torch.cuda.set_device(1)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-18 05:45:28'
+exp_name = 'VideoSaliency_2019-08-25 05:42:12'
 
 # VideoSaliency_2019-08-15 05:22:35
 args = {
-    'snapshot': '5000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -36,9 +36,9 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+# gt_root = os.path.join(davis_path, 'GT')
+# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 #
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
@@ -48,9 +48,9 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # gt_root = os.path.join(mcl_path, 'GT')
 # imgs_path = os.path.join(mcl_path, 'MCL_test_5f.txt')
 
-# to_test = {'UVSD': os.path.join(uvsd_path, 'UVSD_test')}
-# gt_root = os.path.join(uvsd_path, 'GT')
-# imgs_path = os.path.join(uvsd_path, 'UVSD_test_5f.txt')
+to_test = {'UVSD': os.path.join(uvsd_path, 'UVSD_test')}
+gt_root = os.path.join(uvsd_path, 'GT')
+imgs_path = os.path.join(uvsd_path, 'UVSD_test_5f.txt')
 
 # to_test = {'ViSal': os.path.join(visal_path, 'ViSal_test')}
 # gt_root = os.path.join(visal_path, 'GT')
@@ -69,10 +69,10 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
 
 def main():
-    net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)
+    net = R3Net_prior(motion='GRU', se_layer=False, attention=True, pre_attention=True, basic_model='resnet50', sta=True)
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
-    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:2'))
+    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
     net.eval()
     net.cuda()
     results = {}

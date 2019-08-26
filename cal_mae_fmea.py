@@ -6,13 +6,16 @@ from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, ca
 ckpt_path = './ckpt'
 exp_name = 'VideoSaliency_2019-08-19 05:36:03'
 name = 'davis'
+# root = '/home/qub/data/saliency/FBMS/FBMS_Testset2'
 root = '/home/ty/data/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'
+# root = '/home/qub/data/saliency/DAVSOD/DAVSOD_test'
 gt_root = '/home/ty/data/davis/GT'
+# gt_root = '/home/qub/data/saliency/FBMS/GT'
 # gt_root = '/home/qub/data/saliency/MCL/GT'
-# gt_root = '/home/qub/data/saliency/VOS/GT'
+# gt_root = '/home/qub/data/saliency/DAVSOD/GT'
 args = {
-    'snapshot': '15000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }
@@ -30,7 +33,7 @@ for folder in folders:
 
     for img in imgs:
         print(os.path.join(folder, img))
-        if name == 'VOS':
+        if name == 'VOS' or 'DAVSOD':
             image = Image.open(os.path.join(root, folder, img[:-4] + '.png')).convert('RGB')
         else:
             image = Image.open(os.path.join(root, folder, img[:-4] + '.jpg')).convert('RGB')

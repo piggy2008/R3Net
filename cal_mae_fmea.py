@@ -33,7 +33,7 @@ for folder in folders:
 
     for img in imgs:
         print(os.path.join(folder, img))
-        if name == 'VOS' or 'DAVSOD':
+        if name == 'VOS' or name == 'DAVSOD':
             image = Image.open(os.path.join(root, folder, img[:-4] + '.png')).convert('RGB')
         else:
             image = Image.open(os.path.join(root, folder, img[:-4] + '.jpg')).convert('RGB')

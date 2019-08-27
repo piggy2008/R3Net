@@ -28,7 +28,7 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
-    'basic_model': 'resnet101',
+    'basic_model': 'resnext50',
     'motion': '',
     'se_layer': False,
     'attention': True,

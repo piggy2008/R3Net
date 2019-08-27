@@ -38,7 +38,7 @@ In this paper, we propose an end-to-end deep framework, called densely motion fe
 In summary, this paper can conclude the following contributions:
 
 \begin{itemize}
-  \item We proposed a end-to-end densely motion feature enhancement network, without any extra supplementary information in training and testing stage. Additionally, this approach achieve competitive performance in the field of video salient object detection (VSOD) and unsupervised video object segmentation (UVOS). 
+  \item We proposed an end-to-end densely motion feature enhancement network, without any extra supplementary information in training and testing stage. Additionally, this approach achieve competitive performance in the field of video salient object detection (VSOD) and unsupervised video object segmentation (UVOS). 
   \item We introduce an inter-frame motion features enhancement module, which refines the motion features by the recursively aggregated feature maps and historic saliency supervision.
   \item To fully exploit the spatitemporal information and explore their contextual dependencies, a spatiotemporal cross-attention block is proposed to combine the spatial and temporal information together.	  
 \end{itemize}
@@ -47,25 +47,25 @@ In summary, this paper can conclude the following contributions:
 \section{Related Work}
 \subsection{Video salient object detection}
 
-With the introduction of deep learning methods, we can divide prvious video saliency approaches into two phases, which are non-deep learning approaches and deep learning-based approaches. The formers are based on hand-crafted features (e.g., color contrast, texture, optical flow) and heuristic models (e.g., gesidesc distance, center-surround contrast). As the exploitation of optical flow and optimization models, these approaches are usually time-consuming. Moreover, they also cannot conduct the complex video scenes such as motion blur, low contrast, occlusion, because of the limitation of hand-crafted features. With the success of deep learning in many visual tasks, this community also starts to widely use deep learning \cite{A,B,C,D,F}. At the beginning, as the shortage of training data, weakly supervised method \cite{scnn} and data synthetic \cite{fcn} are employed to supply pixel-wise labels. In the aspect of deep saliency models, dilated convolutions and LSTM-based structures are introduced to retain sufficient feature scale and extract motion information, respectively. For example, PDB \cite{pdb} extracts spatial features by pyramid dilated convolutions and obtains temporal features by deeper bi-directional ConvLSTM structure. Based on PDB, SSAV \cite{ssav} further introduces eye fixation records for network training and proposes a saliency-shift-aware convLSTM module to capture video saliency dynamics. Additionally, DLVS \cite{scnn} proposes a saliency detection network by stepwise extracting the static and dynamic information. Li et al. \cite{fgrne} subtly combines optical flow and short connection structure \cite{dss} to propose a flow guided recurrent neural encoder framework. SCOM \cite{scom} and STCR \cite{scom} build different optimization models, but the employment of deep features make them achieve good performances. 
+With the introduction of deep learning methods, we can divide previous video saliency approaches into two phases, which are non-deep learning approaches and deep learning-based approaches. The formers are based on hand-crafted features (e.g., color contrast, texture, optical flow) and heuristic models (e.g., gesidesc distance, center-surround contrast). As the exploitation of optical flow and complex optimization models, these approaches are usually time-consuming. Moreover, they also cannot handle some complex video scenes such as motion blur, low contrast, occlusion, because of the limitation of hand-crafted features. With the success of deep learning in many visual tasks, the community of VSOD also starts to widely use deep learning \cite{A,B,C,D,F}. At the beginning, as the shortage of training data, weakly supervised method \cite{scnn} and data synthetic \cite{fcn} are employed to produce pixel-wise labels. In the aspect of deep saliency models, dilated convolutions and LSTM-based structures are introduced to retain sufficient feature scale and extract motion information, respectively. For example, PDB \cite{pdb} extracts spatial features and temporal features by pyramid dilated convolutions and deeper bi-directional ConvLSTM structure, respectively. Based on PDB, SSAV \cite{ssav} further introduces eye fixation records for network training and proposes a saliency-shift-aware convLSTM module to capture video saliency dynamics. Additionally, DLVS \cite{scnn} proposes a saliency detection network by stepwise extracting the static and dynamic information. Li et al. \cite{fgrne} subtly combines optical flow and short connection structure \cite{dss} to propose a flow guided recurrent neural encoder framework. Along with the deep features, SCOM \cite{scom} and STCR \cite{scom} build respective optimization models for VSOD. 
 
 \subsection{Unsupervised video object segmentation}
 
-Video saliency detection is very similar with Unsupervised video segmentation. The former one is to generate the probability value of each pixel in video frames, the latter one is to classify each pixel. Like the development of video saliency, early video segmentations mainly integrates hand-carfted features and heuristics, which include clustering \cite{keuper2015motion,brox2010object,chang2013video}, objectness \cite{lee2011key,ma2012maximum,koh2017primary,li2018instance} and saliency guidance \cite{hu2018unsupervised,wang2015consistent,wang2015robust}. As the limiting robustness of hand-crafted features and the low speed of optical flow extraction, these approaches have gradually reached the bottleneck. To obtain more robust spatiotemporal features, recent works begin to build their frameworks with convolutional neural networks (CNNs). FusionSeg \cite{jain2017fusionseg} proposes a two-stream framework, which extracts spatial and temporal cues, respectively. In \cite{perazzi2017learning,Tokmakov_2017_CVPR,Cheng_2017_ICCV}, optical flow is widely used to extract motion information for video segmentation. Further, FGRNE \cite{fgrne} incorporate LSTM and optical flow to generate robust motion features. Latest, AGS \cite{AGS} collects UVOS-aware human attention data and then train the attention-guided object segmentation network with this kind of data. In this paper, we also treat video segmentation as an extra validation task, which proves our approache is feasible in this community.  
+Video saliency detection is very similar with Unsupervised video segmentation. The former one is to generate the probability value of each pixel in video frames, while the latter one is to classify each pixel. Like the development of VSOD, early video segmentations mainly integrates hand-carfted features and heuristics, which include clustering \cite{keuper2015motion,brox2010object,chang2013video}, objectness \cite{lee2011key,ma2012maximum,koh2017primary,li2018instance} and saliency guidance \cite{hu2018unsupervised,wang2015consistent,wang2015robust}. As the limiting robustness of hand-crafted features and the low speed of optical flow extraction, these approaches have gradually reached the bottleneck. To obtain more robust spatiotemporal features, recent works begin to build their frameworks with convolutional neural networks (CNNs). FusionSeg \cite{jain2017fusionseg} proposes a two-stream framework, which extracts spatial and temporal cues, respectively. In \cite{perazzi2017learning,Tokmakov_2017_CVPR,Cheng_2017_ICCV}, optical flow is widely used to extract motion information for video segmentation. Further, AGS \cite{AGS} collects UVOS-aware human attention data and then train the attention-guided object segmentation network with this kind of data. In this paper, we also treat UVOS as an auxiliary task to verify the effectiveness of our approach.  
 
 \subsection{Visual attention}
 
-Attention mechanism is to compute the weights from different and complex information. It usually is used for selecting and fusing features in many visual tasks, such as natural language processing \cite{lin2017structured, vaswani2017attention}, image caption \cite{chen2017sca,lu2016hierarchical}, image segmentaion \cite{fu2019dual,yuan2018ocnet}, etc. In particular, the work \cite{yuan2018ocnet} proposes an object context pooling scheme by exploiting self-attention module, whose principle is to compute similarites of all pixels and them selectively integrates them. DANet \cite{fu2019dual} further propose two kinds of attention modules: position attention module (PAM) and channel attention module (CAM). The two modules can explore the contextual dependencies in FCN framework. Inspired by their PAM, we build a cross-attention module to extract the contextual information in spatial and temporal cues. 
+Attention mechanism is to compute the weights from different and complex information. It is usually used for selecting and fusing features in many fields, such as natural language processing \cite{lin2017structured, vaswani2017attention}, image caption \cite{chen2017sca,lu2016hierarchical}, image segmentaion \cite{fu2019dual,yuan2018ocnet}, etc. In particular, the work \cite{yuan2018ocnet} proposes an object context pooling scheme by the self-attention module, whose principle is to compute similarites of all pixels and them selectively integrates them. DANet \cite{fu2019dual} further propose two kinds of attention modules: position attention module (PAM) and channel attention module (CAM). The two modules can explore the contextual dependencies in FCN framework. Inspired by their PAM, we build a mutual attention module to extract the contextual information in spatial and temporal cues. 
 
 \section{Densely motion feature enhancement network}
 
 \subsection{Overview}
 
-The proposed framwork mainly consists of four components. As shown in Fig.\ref{framework}, it includes backbone network, initial motion extractor, inter-frame motion features enhancement module and spatiotemporal cross-attention block. Given the video frames, the spatial features are firstly extracted by the backbone network. Here, to fully exploit the multi-scale features, we follow the feature encoding method \cite{fu2019dual} to merge the feature maps from the last two convlutional blocks of ResNeXt. The merged feature maps are fed into the atrous spatial pyramid pooling module (ASPP) \cite{chen2017rethinking} to refine spatial features. After that, we choose a convGRU layer as the initial motion feature extractor, because its parameters are less and it is able to use a small amount of data to complete training. Next, the initial motion features can be recursively aggregated by the proposed motion feature enhancement module. Additionally, to incorporate the spatial and temporal features, the cross-attention block is embedding after the initial motion extractor. At the top of the framework, the genrated saliency maps are used to compute the loss with the ground truths by sigmoid cross-entropy function, thus optimizing the whole neural network.  
+The proposed framwork mainly consists of four components. As shown in Fig.\ref{framework}, it includes backbone network, initial motion extractor, inter-frame features enhancement module and spatiotemporal mutual attention block. Given the video frames, the spatial features are firstly extracted by the backbone network. Here, to fully exploit the multi-scale features, we follow the feature encoding method \cite{fu2019dual} to merge the feature maps from the last two convlutional blocks of ResNeXt. The merged feature maps are fed into the atrous spatial pyramid pooling module (ASPP) \cite{chen2017rethinking} to refine spatial features. Then, we choose a convGRU layer as the initial motion feature extractor, because its parameters are less and it is able to use a small amount of data to complete training. Next, the initial motion features can be recursively aggregated by the proposed motion feature enhancement module. Additionally, to incorporate the spatial and temporal features, a mutual attention block is embedding after the initial motion extractor. At the top of the framework, the genrated saliency maps are used to compute the loss with the ground truths by sigmoid cross-entropy function, thus optimizing the whole neural network.  
 
 \subsection{Motion feature enhancement}
 
-To solve the fluctuation of feature values in consecutive frames, we propose the inter-frame motion feature enhancement module, which straightforward yet effective. The main idea of this module is to recursively aggregate feature maps and to exploit the historic saliency guidance. Specifically, given the consecutive feature maps $\{..., M_{t-1}, M_{t}, M_{t+1}, ...\}$ from the initial motion extractor, the current feature maps $M_{t}$ are directly added by the previous ones $M_{t-1}$, thus generating the enhanced features $E_{t}$. Meanwhile, inspire by \cite{deng2018r3net}, we introduce a saliency guidance block, which treats the historic saliency maps as an extra supervision information $A_t$ to guide the network learning. The whole process of the motion feature enhancement can be formulated as follows:  
+To solve the fluctuation of feature values in consecutive frames, we propose the inter-frame feature enhancement module, which straightforward yet effective. The main idea of this module is to recursively aggregate feature maps and to exploit the historic saliency guidance. Specifically, given the consecutive feature maps $\{..., M_{t-1}, M_{t}, M_{t+1}, ...\}$ from the mutual attention block, the current feature maps $M_{t}$ are directly added by the previous ones $M_{t-1}$, thus generating the enhanced features $E_{t}$. Meanwhile, inspire by \cite{deng2018r3net}, we introduce a saliency guidance block, which exploits the historic saliency maps as an extra supervision information $A_t$ to guide the network learning. The whole process of the infer-frame feature enhancement can be formulated as follows:  
 
 \begin{equation}
 \label{enhance}
@@ -74,9 +74,9 @@ To solve the fluctuation of feature values in consecutive frames, we propose the
    E_{t}  &= M_{t-1} + M_{t} \\
    A_{t-1}  &= G(P_0, ..., P_{t-2};W_s); t \in \bm{N_{+}}
 \end{aligned}
-\end{equation} where $P_{t}$ and $E_{t}$ and final saliency prediction and enhanced feature maps of current frame. $A_{t-1}$ represents the historic saliency supervision of previous frames. $\Gamma(\cdot; \cdot)$ denotes a group of convolutional operations, which include three standard convolution layers with batch normalization and PReLU activation. Their corresponding convolutional kernals are $3 \times 3$, $3 \times 3$ and $1 \times 1$, respectively. $G(\cdot; \cdot)$ is the squeeze-and-excitation operation \cite{hu2018squeeze}, which is detailedly described later. $W_m$ and $W_s$ are the learnable parameters. 
+\end{equation} where $P_{t}$ and $E_{t}$ represent the final saliency prediction and enhanced feature maps of current frame. $A_{t-1}$ represents the historic saliency supervision of previous frames. $\Gamma(\cdot; \cdot)$ denotes a series of convolutional operations, which contain three standard convolution layers with batch normalization and PReLU activation. Their corresponding convolutional kernals are $3 \times 3 $, $3 \times 3$ and $1 \times 1$, respectively. $G(\cdot; \cdot)$ denotes the squeeze-and-excitation operation \cite{hu2018squeeze} of the saliency guided block, which is used to generate the historic saliency supervision by . $W_m$ and $W_s$ are the learnable parameters. 
 
-Historic saliency supervision. Inspired by \cite{deng2018r3net} and \cite{wang2016saliency}, the saliency results can be regarded as a supervision signal to guide the nework learning. In this module, to fully exploit the sequantial information of the consecutive saliency maps, we introduce the squeeze-and-excitation operation to integrate them. The operation $G(\cdot; \cdot)$ can be described as below. Firstly, an average pooling is used to squeeze the feature maps $\{P_1, P_2 ..., P_{i-1}\}$ in the saliency guided block: 
+Historic saliency supervision. Inspired by \cite{deng2018r3net} and \cite{wang2016saliency}, the saliency results can be regarded as a supervision signal to guide the nework learning. In this module, to fully exploit the sequantial information of the consecutive saliency maps, we introduce the squeeze-and-excitation operation to generate a historic saliency supervision. The operation $G(\cdot; \cdot)$ can be described as below. Firstly, an average pooling is used to squeeze the feature maps $\{P_1, P_2 ..., P_{i-1}\}$ in the saliency guided block: 
 
 \begin{equation}
 \label{sq}
@@ -90,7 +90,7 @@ Historic saliency supervision. Inspired by \cite{deng2018r3net} and \cite{wang20
 \begin{aligned}
    s = f_{ex}(\bm{z}, \textbf{W}) = \sigma(g(\bm{z}, \bm{W})) = \sigma(\bm{W_2}\delta(\bm{W_1}\bm{z}))
  \end{aligned}
-\end{equation} $s$ is the learned weight vector. The whole excitation can be unfolded into two FCs. $\bm{W_1} \in R^{\frac{C}{r}\times C} $ and $\bm{W_2} \in R^{C\times \frac{C}{r}} $ represent the their parameters, where $r$ is the reduction rate. $\sigma(\cdot)$ and $\delta(\cdot)$ demonstrate ReLU and sigmoid activation, respectively. After that, the weighted feature maps can be obtained by a channel-wise multiplication ($f_{s}(\cdot)$ in Eg.\ref{scale}). Finally, the weighted feature maps are weighed sum up to the supervision to guide the learning of next frame with the Eq.\ref{sum_scale}.
+\end{equation} $s$ is the learned weighting vector. The entire excitation can be unfolded into two FCs. $\bm{W_1} \in R^{\frac{C}{r}\times C} $ and $\bm{W_2} \in R^{C\times \frac{C}{r}} $ represent the their parameters, where $r$ is the reduction rate. $\sigma(\cdot)$ and $\delta(\cdot)$ demonstrate ReLU and sigmoid activation, respectively. After that, the weighted feature maps can be obtained by a channel-wise multiplication ($f_{s}(\cdot)$ in Eg.\ref{scale}). Finally, the weighted feature maps are sum up to the supervision to guide the learning of next frame with the Eq.\ref{sum_scale}.
 
 \begin{equation}
 \label{scale}
@@ -123,12 +123,110 @@ This block is embedded between the initial motion feature extractor and motion f
    F = Re(O \cdot V_s)+ I_s + Re(O \cdot V_t)+ I_t 
  \end{aligned}
 \end{equation} where $Re(\cdot)$ is the reshape operation, which turns the result of matrix multiplication between learned weight and valure feature maps ($V_s$ and $V_t$ ) back to $R^{C \times W \times H}$. Then, an element-wise addition is employed to fuse all these feature maps.
+
+\section{Experiments} 
+
+In this section, we validate our approach in two fields, which are video salient object detection and unsupervised video object segmentation. In the first task, we compared the state-of-the-arts with DAVIS, FBMS, ViSal, SegTrack-V2, VOS and DAVSOD, totally 6 datasets. The evaluation criteria of saliency detection is the maximum F-measure and mean absolute error (MAE). In the second task, we adopt the intersection-over-union metric (\mathcal{J}) and contour accuracy metrics (\mathcal{F}) to evaluate the proposed approach and the others. The experimental dataset is the widely used DAVIS. Meanwhile, to validate the effectiveness of the different components, we aslo condust experiments in different settings in this section.
+
+\textbf{Implementaion}. We implement the proposed approach by PyTorch. For the training, the procedure has two stages. At the beginning, the backbone network with pre-trained ImageNet is treated as the baseline and trained by the static image datasets, which include DUT-OMRON and the training set of DAVIS. In the second stage, the proposed MEN is embedded and then the entire network is finetuned with the videos of DAVIS and images of DUT-OMRON. The optimizer we adopt is SGD and the initial learning rates of two stages are $10^{-3}$ and $10^{-5}$, respectively. Additionally, the momentum and weight decay are set to 0.9 and 0.0005. The batch size of network is set to 5. For data augmentation, random cropping (crop size: 473 $\times$ 473), random rotation (10 degree), random horizontal flipping are used for image pre-processing.
+
+\subsection{Results on video salient object detection}
+
+\begin{table}[]
+\label{compare_all}
+\scriptsize
+%\footnotesize
+\center
+\caption{Quantitative comparison results between the state-of-the-arts and the proposed approach. The best three scores are labeled in \textcolor{red}{red}, \textcolor{blue}{blue} and \textcolor{green}{green}, orderly.}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{Method} & \multicolumn{2}{c|}{FBMS-T} & \multicolumn{2}{c|}{DAVIS-T} & \multicolumn{2}{c|}{SegTrack-V2} & \multicolumn{2}{c|}{ViSal} & \multicolumn{2}{c|}{MCL} & \multicolumn{2}{c|}{VOS-T} & \multicolumn{2}{c|}{DAVSOD} \\ \cline{2-15} 
+ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ & $F_\beta\uparrow$ & MAE$\downarrow$ \\ \hline
+SIVM & 0.426 & 0.236 & 0.450 & 0.212 & 0.581 & 0.251 & 0.522 & 0.197 & 0.420 & 0.185 & 0.439 & 0.217 & 0.298 & 0.288 \\ \hline
+TIMP & 0.456 & 0.192 & 0.488 & 0.172 & 0.573 & 0.116 & 0.479 & 0.170 & 0.598 & 0.113 & 0.401 & 0.215 & 0.395 & 0.195 \\ \hline
+SPVM & 0.330 & 0.209 & 0.390 & 0.146 & 0.618 & 0.108 & 0.700 & 0.133 & 0.595 & 0.105 & 0.351 & 0.223 & 0.358 & 0.202 \\ \hline
+RWRV & 0.336 & 0.242 & 0.345 & 0.199 & 0.438 & 0.162 & 0.440 & 0.188 & 0.446 & 0.167 & 0.422 & 0.211 & 0.283 & 0.245 \\ \hline
+MB & 0.487 & 0.206 & 0.470 & 0.177 & 0.554 & 0.146 & 0.692 & 0.129 & 0.261 & 0.178 & 0.562 & 0.158 & 0.342 & 0.228 \\ \hline
+SAGM & 0.564 & 0.161 & 0.515 & 0.103 & 0.634 & 0.081 & 0.688 & 0.105 & 0.422 & 0.136 & 0.482 & 0.172 & 0.370 & 0.184 \\ \hline
+GFVM & 0.571 & 0.160 & 0.569 & 0.103 & 0.592 & 0.091 & 0.683 & 0.107 & 0.406 & 0.132 & 0.506 & 0.162 & 0.334 & 0.167 \\ \hline
+MSTM & 0.500 & 0.177 & 0.429 & 0.165 & 0.526 & 0.114 & 0.673 & 0.095 & 0.313 & 0.171 & 0.567 & 0.144 & 0.344 & 0.211 \\ \hline
+STBP & 0.595 & 0.152 & 0.544 & 0.096 & 0.640 & 0.061 & 0.622 & 0.163 & 0.607 & 0.078 & 0.526 & 0.163 & 0.410 & 0.160 \\ \hline
+SGSP & 0.630 & 0.172 & 0.655 & 0.138 & 0.673 & 0.124 & 0.677 & 0.165 & 0.645 & 0.100 & 0.426 & 0.236 & 0.426 & 0.207 \\ \hline
+SFLR & 0.660 & 0.117 & 0.727 & 0.056 & 0.745 & 0.037 & 0.779 & 0.062 & 0.669 & 0.054 & 0.546 & 0.145 & 0.478 & 0.132 \\ \hline
+SCOM & 0.797 & 0.079 & 0.783 & 0.048 & 0.764 & 0.030 & 0.831 & 0.122 & 0.422 & 0.204 & 0.690 & 0.162 & 0.464 & 0.220 \\ \hline
+SCNN & 0.762 & 0.095 & 0.714 & 0.064 & - & - & 0.831 & 0.071 & 0.628 & 0.054 & 0.609 & 0.109 & 0.532 & 0.128 \\ \hline
+DLVS & 0.759 & 0.091 & 0.708 & 0.061 & - & - & 0.852 & 0.048 & 0.551 & 0.060 & 0.675 & 0.099 & 0.521 & 0.129 \\ \hline
+FGRN & 0.767 & 0.088 & 0.783 & 0.043 & - & - & 0.848 & 0.045 & 0.625 & 0.044 & 0.669 & 0.097 & 0.573 & 0.098 \\ \hline
+MBNM & 0.816 & 0.047 & 0.861 & 0.031 & 0.716 & 0.026 & 0.883 & 0.020 & 0.698 & 0.119 & 0.670 & 0.099 & 0.520 & 0.159 \\ \hline
+PDB & 0.821 & 0.064 & 0.855 & 0.028 & 0.800 & 0.024 & 0.888 & 0.032 & 0.798 & 0.021 & 0.742 & 0.078 & 0.572 & 0.116 \\ \hline
+SSAV & 0.865 & 0.040 & 0.861 & 0.028 & 0.801 & 0.023 & 0.939 & 0.020 & 0.774 & 0.027 & 0.742 & 0.073 & 0.603 & 0.098 \\ \hline
+MEN & 0.833 & 0.060 & 0.888 & 0.0263 & 0.882 & 0.023 & 0.949 & 0.015 & 0.780 & 0.034 & 0.764 & 0.073 & 0.588 & 0.095 \\ \hline
+\end{tabular}
+\end{table}
+
+We totally compared our method with 18 approaches on 7 widely used datasets. Among these approaches, SIVM, TIMP, SPVM, RWRV, MB+M, SAGM, GFVM, MSTM, STBP, SGSP and SFLR are non-deep learning methods, while the others (SCOM, SCNN, DLVS, FGRNE, MBNM, PDB and SSAV) are deep learning based methods. As shown in Table.\ref{compare_all}, we can see that the proposed approach achieve competitve performances in F-measures ($F\beta$) and MAE metrics. In particular, it outperforms the others in DAVIS, ViSal, SegTrack-V2 and VOS.
+
+\begin{table}[]
+\label{compare_all_seg}
+\begin{tabular}{|c|c|ccccccccc}
+\hline
+Dataset & Metric & \multicolumn{1}{c|}{MEN} & \multicolumn{1}{c|}{AGS} & \multicolumn{1}{c|}{PDB} & \multicolumn{1}{c|}{ARP} & \multicolumn{1}{c|}{LVO} & \multicolumn{1}{c|}{FSEG} & \multicolumn{1}{c|}{LMP} & \multicolumn{1}{c|}{SFL} & \multicolumn{1}{c|}{FST} \\ \hline
+\multirow{6}{*}{DAVIS} & J Mean & 80.2 & 79.7 & 77.2 & 76.2 & 75.9 & 70.7 & 70.0 & 67.4 & 55.8 \\
+ & J Recall & 92.5 & 91.1 & 90.1 & 91.1 & 89.1 & 83.5 & 85.0 & 81.4 & 64.9 \\
+ & J Decay & 0.0 & 0.0 & 0.9 & 7.0 & 0.0 & 1.5 & 1.3 & 6.2 & 0.0 \\ \cline{2-11} 
+ & F Mean & 78.5 & 77.4 & 74.5 & 72.1 & 72.1 & 65.3 & 65.9 & 66.7 & 51.1 \\
+ & F Recall & 89.6 & 85.8 & 84.4 & 83.5 & 83.4 & 73.8 & 79.2 & 77.1 & 51.6 \\
+ & F Decay & 0.0 & 0.0 & -0.2 & 7.9 & 1.3 & 1.8 & 2.5 & 5.1 & 2.9 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Results on unsupervised video object segmentation}
+
+As the similarities between the VSOD and UVOS, we also condust the experiment against the state-of-the-arts in UVOS. These approaches are AGS, PDB, ARP, LVO, FSEG, LMP, SFL and FST. Follow the common settings \cite{AGS,PDB}, we employ the dense CRF \cite{crf} as a post-processing to refine the saliency maps generated from our network. As shown in Table.\ref{compare_all_seg}, we introduce the mean, recall and decay of \mathcal{J} and \mathcal{F} to evaluate the methods. The results prove that the proposed MEN achieves the remarkable performancein on DAVIS datasets. Notice that there is a great improvement in the aspect of recall, which achieves 92.5 and 89.6 and exceeds the second place with 1.4 and 3.8, respectively.
+
+\begin{table}[]
+\caption{Ablation study on DAVIS test set. RAM	denotes the recursive feature aggregation module, HSS respresents the historic saliency supervision; MAB is the mutual attention block.}
+\label{diff_compare}
+\begin{tabular}{cccc|cc}
+\hline
+method & RAM & HSS & MAB & F-measure & MAE \\ \hline
+BS &  &  &  & 0.848 & 0.0451 \\
+MEN & T &  &  & 0.875 & 0.0305 \\
+MEN & T & T &  & 0.877 & 0.0289 \\
+MEN & T & T & T & 0.888 & 0.0263 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Ablation Studies}
+
+In this section, we design two experiments to validate the effect of different components in the proposed method. Firstly, the effectiveness of motion feature enhancement module and mutual attention block is validated in Table.\ref{diff_compare}. Compared with the baseline, which integrates the ResNeXt-101 and ASPP module, the empolyment of the proposed modules bring an obvious improvement. Besides, with exploitation of historic saliency supervision and mutual attention block, the performance gradually increases, thus improving to 0.888 and 0.0263 in term of F-measure and MAE. Secondly, we verify the effectiveness of MEN in different base network. In the paper, the backbone network consists of base network and ASPP module. We try to use different base network like ResNet-50, ResNeXt-50, ResNet-101 and ResNeXt-101 as the feature extractor. Table.\ref{diff_compare2} shows that our MEN brings the improvement even if the base network is changed. It is proved that the proposed approach is able to refine more robust spatiotemporal features by inter-frame feature aggregation and mutual attention block.
+
+\begin{table}[]
+\caption{Performance comparison with different base network on DAVIS test set.}
+\label{diff_compare2}
+\begin{tabular}{ccc}
+\multirow{2}{*}{Method} & \multicolumn{2}{c}{DAVIS} \\
+ & F-measure & MAE \\
+resnet50(?)  & 0.821 & \multicolumn{1}{l}{0.0373(0.0511)} \\
+resnext50 & 0.837 & 0.0483 \\
+resnet101 & 0.844 & 0.0438 \\
+resnext101 & 0.848 & 0.0451 \\
+resnet50 + MEN & 0.857 & 0.0313 \\	
+resnext50 + MEN & 0.868 & 0.0311 \\
+resnet101 + MEN & 0.875 & 0.0298 \\
+resnext101 + MEN & 0.888 & 0.0263
+\end{tabular}
+\end{table}
+
+\section{Conclusion}
+
+In this paper, we propose an end-to-end densely spatiotemporal feature enhancement network for video saliency detection and video object segmentation, which is able to extract and enhance the robust spatiotemporal features. Specifically, the proposed infer-frame feature enhancement module, which includes recursive feature aggregation and historic saliency supervision, can fully exploit the relationship between the consecutive frames to learn reliable features. Meanwhile, to explore the contextual dependencies between spatial and temporal features, we introduce a mutual attention block to fuse them in the proposed network. Additionally, the experiments prove that our method achieves competitive performances in the VSOD and UVOS datasets such as DAVIS, FBMS, ViSal, etc.  
  
 \begin{comment}
 @inproceedings{wang2016saliency,
   title={Saliency detection with recurrent fully convolutional networks},
   author={Wang, Linzhao and Wang, Lijun and Lu, Huchuan and Zhang, Pingping and Ruan, Xiang},
-  booktitle={European conference on computer vision},
+  booktitle={European conference on computer vision},	
   pages={825--841},
   year={2016},
   organization={Springer}

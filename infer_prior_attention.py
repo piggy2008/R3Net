@@ -11,20 +11,20 @@ from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model_prior_attention import R3Net_prior
 from utils import MaxMinNormalization
-
+import time
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(1)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-26 19:28:54'
+exp_name = 'VideoSaliency_2019-08-15 05:22:35'
 
 # VideoSaliency_2019-08-15 05:22:35
 args = {
-    'snapshot': '15000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -69,7 +69,7 @@ imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 # imgs_path = os.path.join(davsod_path, 'DAVSOD_test_5f.txt')
 
 def main():
-    net = R3Net_prior(motion='GRU', se_layer=False, attention=True, pre_attention=True, basic_model='resnet101', sta=True)
+    net = R3Net_prior(motion='GRU', se_layer=False, attention=False, pre_attention=True, basic_model='resnext101', sta=True)
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
@@ -102,7 +102,10 @@ def main():
                     img_var.append(Variable(img_transform(img).unsqueeze(0), volatile=True).cuda())
 
                 img_var = torch.cat(img_var, dim=0)
+                start = time.time()
                 prediction = net(img_var)
+                end = time.time()
+                print('running time:', (end - start))
                 precision = to_pil(prediction.data.squeeze(0).cpu())
                 precision = precision.resize(shape)
                 prediction = np.array(precision)

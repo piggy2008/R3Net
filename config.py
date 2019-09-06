@@ -2,9 +2,9 @@
 import os
 
 # szu 169 sever
-datasets_root = '/home/ty/data'
+# datasets_root = '/home/ty/data'
 # local pc
-# datasets_root = '/home/qub/data/saliency'
+datasets_root = '/home/qub/data/saliency'
 
 # For each dataset, I put images and masks together
 msra10k_path = os.path.join(datasets_root, 'msra10k')

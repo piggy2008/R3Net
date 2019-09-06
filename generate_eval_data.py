@@ -2,13 +2,13 @@ import os
 from PIL import Image
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-05-14 17:13:16'
+exp_name = 'VideoSaliency_2019-08-15 05:22:35'
 name = 'davis'
 root = '/home/qub/data/saliency/davis/davis_test2'
 gt_root = '/home/qub/data/saliency/davis/GT'
 
 args = {
-    'snapshot': '30000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }

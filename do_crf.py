@@ -4,13 +4,13 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-05-14 17:13:16'
+exp_name = 'VideoSaliency_2019-08-15 05:22:35'
 name = 'davis'
 root = '/home/qub/data/saliency/davis/davis_test2'
 gt_root = '/home/qub/data/saliency/davis/GT'
 # gt_root = '/home/qub/data/saliency/VOS/GT'
 args = {
-    'snapshot': '30000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': True,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }

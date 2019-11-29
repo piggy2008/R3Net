@@ -5,7 +5,8 @@ import torch
 import torch.utils.data as data
 from PIL import Image
 from matplotlib import pyplot as plt
-
+import random
+import torchvision
 
 
 def make_dataset(root):
@@ -43,7 +44,7 @@ class VideoImageFolder(data.Dataset):
     def __init__(self, root, imgs_file, joint_transform=None, transform=None, target_transform=None):
         self.root = root
         self.imgs = [i_id.strip() for i_id in open(imgs_file)]
-        self.imgs.sort()
+        # self.imgs.sort()
         self.joint_transform = joint_transform
         self.transform = transform
         self.target_transform = target_transform
@@ -63,6 +64,7 @@ class VideoImageFolder(data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
+
 
 class VideoSequenceFolder(data.Dataset):
     # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
@@ -102,6 +104,7 @@ class VideoSequenceFolder(data.Dataset):
 
 if __name__ == '__main__':
     from torchvision import transforms
+
     import joint_transforms
     from torch.utils.data import DataLoader
     from config import msra10k_path, video_seq_path, video_seq_gt_path, video_train_path
@@ -118,20 +121,31 @@ if __name__ == '__main__':
     ])
     target_transform = transforms.ToTensor()
 
-    # imgs_file = '/home/qub/data/saliency/video_saliency/train_all_THUR_seq_5f (copy).txt'
+    # imgs_file = '/home/ty/data/video_saliency/train_all_DAFB2_DAVSOD_5f.txt'
     # train_set = VideoSequenceFolder(video_seq_path, video_seq_gt_path, imgs_file, joint_transform, img_transform, target_transform)
-    imgs_file = '/home/qub/data/saliency/Pre-train/pretrain_all_seq2.txt'
+    imgs_file = '/home/ty/data/Pre-train/pretrain_all_seq_DUT_TR_DAFB2_DAVSOD.txt'
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
-    train_loader = DataLoader(train_set, batch_size=5, num_workers=12, shuffle=False)
+    train_loader = DataLoader(train_set, batch_size=10, num_workers=12, shuffle=False)
 
     for i, data in enumerate(train_loader):
         input, target = data
+        input = input.squeeze(0)
+        target = target.squeeze(0)
         input = input.data.cpu().numpy()
         target = target.data.cpu().numpy()
         # np.savetxt('image.txt', input[0, 0, :, :])
         # input = input.transpose(0, 2, 3, 1)
-        # for i in range(0, input.shape[0]):
-        #     plt.subplot(2, 3, i + 1)
-        #     plt.imshow(input[i])
+        # target = target.transpose(0, 2, 3, 1)
+        # # for i in range(0, input.shape[0]):
+        # plt.subplot(2, 2, 1)
+        # plt.imshow(input[0])
+        # plt.subplot(2, 2, 2)
+        # plt.imshow(target[0, :, :, 0])
+        #
+        # plt.subplot(2, 2, 3)
+        # plt.imshow(input[1])
+        # plt.subplot(2, 2, 4)
+        # plt.imshow(target[1, :, :, 0])
+        #
         # plt.show()
-        # print(input.shape)
+        print(input.shape)

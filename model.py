@@ -11,6 +11,7 @@ from resnext.resnet50 import ResNet50
 from resnext.resnet101 import ResNet101
 from module.attention import BaseOC_Context_Module
 
+
 class R3Net(nn.Module):
     def __init__(self, motion='GRU', se_layer=False, attention=False, basic_model='resnext50'):
         super(R3Net, self).__init__()

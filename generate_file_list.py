@@ -1,4 +1,5 @@
 import os
+from PIL import Image
 
 def genrate_davis_test_single_imgs(root, save_path):
     file = open(save_path, 'w')
@@ -166,6 +167,21 @@ def generate_single_by_THUR(path, save_path, batch):
 
     file.close()
 
+def generate_single_by_DAVSOD(path, save_path):
+    folders = os.listdir(path)
+    folders.sort()
+    file = open(save_path, 'w')
+    for folder in folders:
+        images = os.listdir(os.path.join(path, folder, 'Imgs'))
+        images.sort()
+        for img in images:
+            img_temp = os.path.join('DAVSOD', folder, 'Imgs', img)
+            gt_temp = os.path.join('DAVSOD', folder, 'GT_object_level', img[:-4] + '.png')
+            print(img_temp + ' ' + gt_temp)
+            file.writelines(img_temp + ' ' + gt_temp + '\n')
+
+    file.close()
+
 def generate_seq_by_DUTS_TR(path, save_path):
     folders = os.listdir(path)
     folders.sort()
@@ -217,15 +233,65 @@ def generate_seq_by_MSRA10K(path, save_path, batch):
 
     file.close()
 
-if __name__ == '__main__':
-    # root = '/home/qub/data/saliency/video_saliency/train_all_gt2_revised/MSRA10K_Imgs_GT'
-    # save_path = '/home/qub/data/saliency/video_saliency/train_all_MSRA10K_seq_5f.txt'
-    root = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test'
-    gt_root = '/home/qub/data/saliency/VOS/GT'
-    save_path = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test_5f.txt'
+def remove_folder(path, remove_folder):
+    folders = os.listdir(path)
+    folders.sort()
+    for folder in folders:
+        imgs = os.listdir(os.path.join(path, folder, remove_folder))
+        imgs.sort()
+        for i, img in enumerate(imgs):
+            image = Image.open(os.path.join(path, folder, remove_folder, img)).convert('RGB')
+            os.remove(os.path.join(path, folder, remove_folder, img))
+            image.save(os.path.join(path, folder, img))
+            if i == (len(imgs) - 1):
+                os.rmdir(os.path.join(path, folder, remove_folder))
 
+def replace_suffix(path, suffix):
+    folders = os.listdir(path)
+    folders.sort()
+    for folder in folders:
+        imgs = os.listdir(os.path.join(path, folder))
+        imgs.sort()
+        for i, img in enumerate(imgs):
+            image = Image.open(os.path.join(path, folder, img)).convert('RGB')
+            image.save(os.path.join(path, folder, img[:-4] + suffix))
+            os.remove(os.path.join(path, folder, img))
+
+
+
+if __name__ == '__main__':
+    root = '/home/ty/data/Pre-train/DAVSOD'
+    # save_path = '/home/qub/data/saliency/video_saliency/train_all_MSRA10K_seq_5f.txt'
+    # root = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test'
+    # gt_root = '/home/qub/data/saliency/VOS/GT'
+    # save_path = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test_5f.txt'
+    save_path = '/home/ty/data/Pre-train/pretrain_all_DAVSOD.txt'
     # genrate_davis_test_single_imgs(root, save_path)
     # generate_seq_by_DUTS_TR(root, save_path)
     # generate_seq_by_MCL(root, gt_root, save_path)
-    generate_seq(root, save_path, dataset='')
+    generate_single_by_DAVSOD(root, save_path)
+    # generate_seq(root, save_path, dataset='DAVSOD')
     # generate_seq_by_ViSal(root, gt_root, save_path)
+    # replace_suffix('/home/ty/data/video_saliency/train_all/DAVSOD', '.jpg')
+    # remove_folder('/home/ty/data/video_saliency/train_all/DAVSOD', 'Imgs')
+    # import random
+    # num_frames = 100
+    # clip_length = 5
+    # x = 4  # 6
+    # k = random.randint(1, x)
+    # print('k = ', k)
+    # top = num_frames - clip_length * k - 1
+    # while top <= 1:
+    #     x -= 1
+    #     k = random.randint(1, x)
+    #     top = num_frames - clip_length * k - 1
+    #
+    # rand_frame = random.randint(0, top)
+    # frames = []
+    # labels = []
+    # atts = []
+    #
+    # for i in range(rand_frame, rand_frame + k *clip_length, k):
+    #     print('i = ', i)
+
+

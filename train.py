@@ -41,7 +41,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth'),
+    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth.backup'),
     'pretrain': '',
     'imgs_file': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',

@@ -12,7 +12,7 @@ import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path
 from datasets import ImageFolder, VideoImageFolder, VideoSequenceFolder
 from misc import AvgMeter, check_mkdir
-from others.resnet_dss import DSS
+from model_sasc import R3Net
 from torch.backends import cudnn
 import time
 from utils import load_part_of_model
@@ -28,23 +28,24 @@ ckpt_path = './ckpt'
 exp_name = 'VideoSaliency' + '_' + time_str
 
 args = {
+    'basic_model': 'resnet50',
     'motion': '',
     'se_layer': False,
-    'attention': False,
-    'iter_num': 30000,
+    'attention': True,
+    'dilation': True,
+    'iter_num': 50000,
     'iter_save': 10000,
-    'train_batch_size': 5,
+    'train_batch_size': 6,
     'last_iter': 0,
-    'lr': 0.001,
+    'lr': 5 * 1e-3,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.9,
     'snapshot': '',
-    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-04-24 23:34:00', '10000.pth.backup'),
+    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2019-11-27 22:38:04', '10000.pth'),
     'pretrain': '',
-    # 'imgs_file': 'Pre-train/pretrain_all_seq_DUT_DAFB2.txt',
-    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
-    # 'imgs_file': 'video_saliency/train_all_DAFB3_seq_5f.txt',
+    'imgs_file': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2_DAVSOD.txt',
+    # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
     'train_loader': 'video_image'
     # 'train_loader': 'video_sequence'
 }
@@ -53,6 +54,7 @@ imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
 joint_transform = joint_transforms.Compose([
+    joint_transforms.ImageResize(520),
     joint_transforms.RandomCrop(473),
     joint_transforms.RandomHorizontallyFlip(),
     joint_transforms.RandomRotate(10)
@@ -69,7 +71,7 @@ if args['train_loader'] == 'video_sequence':
 else:
     train_set = VideoImageFolder(video_train_path, imgs_file, joint_transform, img_transform, target_transform)
 
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=12, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 
 criterion = nn.BCEWithLogitsLoss().cuda()
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -86,9 +88,9 @@ def fix_parameters(parameters):
 
 
 def main():
-    net = DSS(motion=args['motion'],
+    net = R3Net(motion=args['motion'],
                 se_layer=args['se_layer'],
-                attention=args['attention']).cuda().train()
+                attention=args['attention'], dilation=args['dilation'], basic_model=args['basic_model']).cuda().train()
 
     # fix_parameters(net.named_parameters())
     optimizer = optim.SGD([
@@ -119,31 +121,34 @@ def train(net, optimizer):
     curr_iter = args['last_iter']
     while True:
         total_loss_record, loss0_record, loss1_record, loss2_record = AvgMeter(), AvgMeter(), AvgMeter(), AvgMeter()
-        loss3_record, loss4_record, loss5_record = AvgMeter(), AvgMeter(), AvgMeter()
+        # loss3_record = AvgMeter()
 
         for i, data in enumerate(train_loader):
+
             optimizer.param_groups[0]['lr'] = 2 * args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                                 ) ** args['lr_decay']
             optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                             ) ** args['lr_decay']
 
             inputs, labels = data
-            inputs = inputs.squeeze(0)
-            labels = labels.squeeze(0)
+            if args['train_loader'] == 'video_sequence':
+                inputs = inputs.squeeze(0)
+                labels = labels.squeeze(0)
             batch_size = inputs.size(0)
             inputs = Variable(inputs).cuda()
             labels = Variable(labels).cuda()
 
             optimizer.zero_grad()
-            outputs0, outputs1, outputs2, outputs3, outputs4, outputs5 = net(inputs)
+            outputs0, outputs1, outputs2 = net(inputs)
             loss0 = criterion(outputs0, labels)
             loss1 = criterion(outputs1, labels)
             loss2 = criterion(outputs2, labels)
-            loss3 = criterion(outputs3, labels)
-            loss4 = criterion(outputs4, labels)
-            loss5 = criterion(outputs5, labels)
+            # loss3 = criterion(outputs3, labels)
+            # loss4 = criterion(outputs4, labels)
 
-            total_loss = loss0 + loss1 + loss2 + loss3 + loss4 + loss5
+
+            total_loss = loss0 + loss1 + loss2
+
             total_loss.backward()
             optimizer.step()
 
@@ -151,19 +156,18 @@ def train(net, optimizer):
             loss0_record.update(loss0.data, batch_size)
             loss1_record.update(loss1.data, batch_size)
             loss2_record.update(loss2.data, batch_size)
-            loss3_record.update(loss3.data, batch_size)
-            loss4_record.update(loss4.data, batch_size)
-            loss5_record.update(loss5.data, batch_size)
+            # loss3_record.update(loss3.data, batch_size)
+            # loss4_record.update(loss4.data, batch_size)
+
 
 
             curr_iter += 1
 
-            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f], [loss3 %.5f], ' \
-                  '[loss4 %.5f], [loss5 %.5f], [lr %.13f]' % \
+            log = '[iter %d], [total loss %.5f], [loss0 %.5f], [loss1 %.5f], [loss2 %.5f] ' \
+                  '[lr %.13f]' % \
                   (curr_iter, total_loss_record.avg, loss0_record.avg, loss1_record.avg, loss2_record.avg,
-                   loss3_record.avg, loss4_record.avg, loss5_record.avg,
                    optimizer.param_groups[1]['lr'])
-            print (log)
+            print(log)
             open(log_path, 'a').write(log + '\n')
 
             if curr_iter % args['iter_save'] == 0:

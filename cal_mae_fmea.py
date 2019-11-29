@@ -4,18 +4,18 @@ from PIL import Image
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-21 17:57:19'
+exp_name = 'VideoSaliency_2019-11-21 19:56:18'
 name = 'davis'
 # root = '/home/qub/data/saliency/FBMS/FBMS_Testset2'
 root = '/home/ty/data/davis/davis_test2'
 # root = '/home/qub/data/saliency/MCL/MCL_test'
-# root = '/home/qub/data/saliency/DAVSOD/DAVSOD_test'
+# root = '/home/ty/data/DAVSOD/DAVSOD_test'
 gt_root = '/home/ty/data/davis/GT'
 # gt_root = '/home/qub/data/saliency/FBMS/GT'
 # gt_root = '/home/qub/data/saliency/MCL/GT'
-# gt_root = '/home/qub/data/saliency/DAVSOD/GT'
+# gt_root = '/home/ty/data/DAVSOD/GT'
 args = {
-    'snapshot': '15000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True  # whether to save the resulting masks
 }
@@ -297,3 +297,31 @@ print (results)
 # {'ViSal': {'mae': 0.015052299736749774, 'fmeasure': 0.9492640942370092}}
 # {'UVSD': {'fmeasure': 0.6981638464285685, 'mae': 0.037293701491150306}}
 # {'MCL': {'fmeasure': 0.7802265038605428, 'mae': 0.034676702495845035}}
+
+# VideoSaliency_2019-10-18 15:57:27 used for validate the LSTM senario
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + LSTM + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.8819791669234219, 'mae': 0.027835531901318836}}
+
+
+# VideoSaliency_2019-10-18 16:27:15 used for replacing mutual attention with addition
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.884, 'mae': 0.0263}} 20000
+# {'davis': {'fmeasure': 0.8830341793022286, 'mae': 0.02762751428279943}} 15000
+# {'davis': {'fmeasure': 0.8818999449299334, 'mae': 0.028222377521135975}} 25000
+# {'davis': {'fmeasure': 0.8822463482353269, 'mae': 0.027449925224086794}} 30000
+
+# VideoSaliency_2019-10-18 22:15:32 used for replacing mutual attention with concat
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.8783563016062568, 'mae': 0.028543348960840154}} 30000
+
+# VideoSaliency_2019-10-18 22:15:32 used for replacing mutual attention with multipy
+# finetune VideoSaliency_2019-06-26 00:07:16;  model:resnext101 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'davis': {'fmeasure': 0.880557849206916, 'mae': 0.027870731202063934}} 30000
+
+# VideoSaliency_2019-08-25 18:55:50
+# model:resnet50 + R3Net + GRU + motion enhancement + saliency guide block + STA(self attention)
+# {'VOS': {'fmeasure': 0.7203863443068934, 'mae': 0.08559279067970993}}
+# {'SegTrackV2': {'fmeasure': 0.8051851775515824, 'mae': 0.026605373713406655}}
+# {'ViSal': {'fmeasure': 0.9259855810752392, 'mae': 0.026381948506201736}}
+# {'FBMS': {'fmeasure': 0.8225627461536053, 'mae': 0.06362138353610897}}
+# {'DAVSOD': {'fmeasure': 0.5397687767436796, 'mae': 0.09922930943792657}}

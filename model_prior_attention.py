@@ -16,7 +16,7 @@ import numpy as np
 
 class R3Net_prior(nn.Module):
     def __init__(self, motion='GRU', se_layer=False, attention=False, pre_attention=False, isTriplet=False,
-                 basic_model='resnext50', sta=False):
+                 basic_model='resnext50', sta=False, naive_fuse=False):
         super(R3Net_prior, self).__init__()
 
         self.motion = motion
@@ -25,6 +25,7 @@ class R3Net_prior(nn.Module):
         self.pre_attention = pre_attention
         self.isTriplet = isTriplet
         self.sta = sta
+        self.naive_fuse = naive_fuse
 
         if basic_model == 'resnext50':
             resnext = ResNeXt50()
@@ -96,6 +97,14 @@ class R3Net_prior(nn.Module):
             self.sp_down = nn.Sequential(
                 nn.Conv2d(256, 64, kernel_size=1), nn.PReLU()
             )
+
+        if self.naive_fuse:
+            self.sp_down = nn.Sequential(
+                nn.Conv2d(256, 64, kernel_size=1), nn.PReLU()
+            )
+            # self.sp_down2 = nn.Sequential(
+            #     nn.Conv2d(128, 64, kernel_size=1), nn.PReLU()
+            # )
 
 
         self.predict0 = nn.Conv2d(256, 1, kernel_size=1)
@@ -197,6 +206,14 @@ class R3Net_prior(nn.Module):
                 #                               reduce_high_down.normal_(mean=float(high_motion.mean().data.cpu().numpy()),
                 #                                                        std=float(high_motion.std().data.cpu().numpy())))
                 high_motion = self.sta_module(high_motion, reduce_high_down)
+                high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
+
+            if self.naive_fuse:
+                high_motion = F.upsample(high_motion, size=(70, 70), mode='bilinear', align_corners=True)
+                reduce_high_down = F.upsample(reduce_high, size=(70, 70), mode='bilinear', align_corners=True)
+                reduce_high_down = self.sp_down(reduce_high_down)
+                # high_motion = self.sp_down2(torch.cat([high_motion, reduce_high_down], dim=1))
+                high_motion = high_motion * reduce_high_down
                 high_motion = F.upsample(high_motion, size=(119, 119), mode='bilinear', align_corners=True)
 
         predict0 = self.predict0(reduce_high)

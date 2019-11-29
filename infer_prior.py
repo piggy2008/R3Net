@@ -6,9 +6,11 @@ from PIL import Image
 from torch.autograd import Variable
 from torchvision import transforms
 
-from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path, fbms_path
+from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, davis_path, fbms_path, mcl_path
 from misc import check_mkdir, crf_refine, AvgMeter, cal_precision_recall_mae, cal_fmeasure
 from model_prior import R3Net_prior
+
+from utils import MaxMinNormalization
 
 torch.manual_seed(2018)
 
@@ -18,10 +20,10 @@ torch.cuda.set_device(0)
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-05-16 17:52:08'
+exp_name = 'VideoSaliency_2019-07-06 01:08:23'
 
 args = {
-    'snapshot': '30000',  # your snapshot filename (exclude extension name)
+    'snapshot': '20000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -33,16 +35,37 @@ img_transform = transforms.Compose([
 ])
 to_pil = transforms.ToPILImage()
 
-to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
+# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+# gt_root = os.path.join(davis_path, 'GT')
+# imgs_path = os.path.join(davis_path, 'davis_test2_5f.txt')
 
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
 # imgs_path = os.path.join(fbms_path, 'FBMS_seq_file_5f.txt')
 
+to_test = {'MCL': os.path.join(mcl_path, 'MCL_test')}
+gt_root = os.path.join(mcl_path, 'GT')
+imgs_path = os.path.join(mcl_path, 'MCL_test_5f.txt')
+
+# to_test = {'UVSD': os.path.join(uvsd_path, 'UVSD_test')}
+# gt_root = os.path.join(uvsd_path, 'GT')
+# imgs_path = os.path.join(uvsd_path, 'UVSD_test_5f.txt')
+
+# to_test = {'ViSal': os.path.join(visal_path, 'ViSal_test')}
+# gt_root = os.path.join(visal_path, 'GT')
+# imgs_path = os.path.join(visal_path, 'ViSal_test_5f.txt')
+
+# to_test = {'VOS': os.path.join(vos_path, 'VOS_test')}
+# gt_root = os.path.join(vos_path, 'GT')
+# imgs_path = os.path.join(vos_path, 'VOS_test_5f.txt')
+
+# to_test = {'SegTrackV2': os.path.join(segtrack_path, 'SegTrackV2_test')}
+# gt_root = os.path.join(segtrack_path, 'GT')
+# imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_5f.txt')
+
+
 def main():
-    net = R3Net_prior(motion='GRU', se_layer=False, attention=True)
+    net = R3Net_prior(motion='no', se_layer=False, attention=True, basic_model='resnext101')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
     net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
@@ -76,6 +99,9 @@ def main():
                 precision = to_pil(prediction.data.squeeze(0).cpu())
                 precision = precision.resize(shape)
                 prediction = np.array(precision)
+                prediction = prediction.astype('float')
+                prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
+                prediction = prediction.astype('uint8')
 
                 if args['crf_refine']:
                     prediction = crf_refine(np.array(img), prediction)

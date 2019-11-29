@@ -15,15 +15,15 @@ import time
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(1)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = './ckpt'
-exp_name = 'VideoSaliency_2019-08-27 06:34:25'
+exp_name = 'VideoSaliency_2019-04-20 23:11:17'
 
 args = {
-    'snapshot': '15000',  # your snapshot filename (exclude extension name)
+    'snapshot': '30000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'input_size': (473, 473)
@@ -38,17 +38,17 @@ to_pil = transforms.ToPILImage()
 # to_test = {'ecssd': ecssd_path, 'hkuis': hkuis_path, 'pascal': pascals_path, 'sod': sod_path, 'dutomron': dutomron_path}
 # to_test = {'ecssd': ecssd_path}
 
-to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
-gt_root = os.path.join(davis_path, 'GT')
-imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
+# to_test = {'davis': os.path.join(davis_path, 'davis_test2')}
+# gt_root = os.path.join(davis_path, 'GT')
+# imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
 
 # to_test = {'FBMS': os.path.join(fbms_path, 'FBMS_Testset')}
 # gt_root = os.path.join(fbms_path, 'GT')
 # imgs_path = os.path.join(fbms_path, 'FBMS_test_single.txt')
 
-# to_test = {'SegTrackV2': os.path.join(segtrack_path, 'SegTrackV2_test')}
-# gt_root = os.path.join(segtrack_path, 'GT')
-# imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_single.txt')
+to_test = {'SegTrackV2': os.path.join(segtrack_path, 'SegTrackV2_test')}
+gt_root = os.path.join(segtrack_path, 'GT')
+imgs_path = os.path.join(segtrack_path, 'SegTrackV2_test_single2.txt')
 
 # to_test = {'ViSal': os.path.join(visal_path, 'ViSal_test')}
 # gt_root = os.path.join(visal_path, 'GT')
@@ -63,10 +63,10 @@ imgs_path = os.path.join(davis_path, 'davis_test2_single.txt')
 # imgs_path = os.path.join(mcl_path, 'MCL_test_single.txt')
 
 def main():
-    net = R3Net(motion='', se_layer=False, attention=True, basic_model='resnet50')
+    net = R3Net(motion='', se_layer=False, attention=False, basic_model='resnext101')
 
     print ('load snapshot \'%s\' for testing' % args['snapshot'])
-    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:1'))
+    net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth'), map_location='cuda:0'))
     net.eval()
     net.cuda()
     results = {}
@@ -82,16 +82,26 @@ def main():
                 check_mkdir(os.path.join(ckpt_path, exp_name, '(%s) %s_%s' % (exp_name, name, args['snapshot'])))
             img_list = [i_id.strip() for i_id in open(imgs_path)]
             # img_list = [os.path.splitext(f)[0] for f in os.listdir(root) if f.endswith('.jpg')]
-            for idx, img_name in enumerate(img_list):
+            for idx, img_names in enumerate(img_list):
                 print ('predicting for %s: %d / %d' % (name, idx + 1, len(img_list)))
-
-                if name == 'VOS':
-                    img = Image.open(os.path.join(root, img_name + '.png')).convert('RGB')
-                else:
-                    img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
-                shape = img.size
-                img = img.resize(args['input_size'])
-                img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
+                img_seq = img_names.split(',')
+                img_var = []
+                for img_name in img_seq:
+                    if name == 'VOS' or name == 'DAVSOD':
+                        img = Image.open(os.path.join(root, img_name + '.png')).convert('RGB')
+                    else:
+                        img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
+                    shape = img.size
+                    img = img.resize(args['input_size'])
+                    img_var.append(Variable(img_transform(img).unsqueeze(0), volatile=True).cuda())
+                # if name == 'VOS':
+                #     img = Image.open(os.path.join(root, img_name + '.png')).convert('RGB')
+                # else:
+                #     img = Image.open(os.path.join(root, img_name + '.jpg')).convert('RGB')
+                # shape = img.size
+                # img = img.resize(args['input_size'])
+                # img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
+                img_var = torch.cat(img_var, dim=0)
                 start = time.time()
                 prediction = net(img_var)
                 end = time.time()

@@ -14,6 +14,19 @@ def genrate_davis_test_single_imgs(root, save_path):
 
     file.close()
 
+def genrate_test_single_imgs(root, save_path, dataset='davis_test2'):
+    file = open(save_path, 'w')
+    folders = os.listdir(os.path.join(root, dataset))
+    for folder in folders:
+        imgs = os.listdir(os.path.join(root, dataset, folder))
+        imgs.sort()
+        for img in imgs:
+            name, suffix = os.path.splitext(img)
+            file.writelines('/home/ty/data/Easy-35/' + folder + '/Imgs/' + img + ' 0\n')
+            print (os.path.join(folder, name))
+
+    file.close()
+
 def generate_seq(path, save_path, dataset='davis', batch=5):
     folders = os.listdir(path)
     folders.sort()
@@ -21,6 +34,24 @@ def generate_seq(path, save_path, dataset='davis', batch=5):
     for folder in folders:
         images = os.listdir(os.path.join(path, folder))
         images.sort()
+
+        for m in range(0, batch - 1):
+            image_batch = ''
+
+            for n in range(0, batch - m - 1):
+                image = images[0]
+                name, suffix = os.path.splitext(image)
+                path_temp = os.path.join(dataset, folder, name)
+                image_batch = image_batch + path_temp + ','
+
+            for a in range(0, m + 1):
+                image_ = images[a]
+                name_, suffix = os.path.splitext(image_)
+                path_temp_ = os.path.join(dataset, folder, name_)
+                image_batch = image_batch + path_temp_ + ','
+            print(image_batch[:-1])
+            file.writelines(image_batch[:-1] + '\n')
+
         for i in range(0, len(images) - batch + 1):
             image_batch = ''
             for j in range(batch):
@@ -233,6 +264,7 @@ def generate_seq_by_MSRA10K(path, save_path, batch):
 
     file.close()
 
+
 def remove_folder(path, remove_folder):
     folders = os.listdir(path)
     folders.sort()
@@ -259,12 +291,50 @@ def replace_suffix(path, suffix):
 
 
 
+def change_map_path(path):
+    import shutil
+    folders = os.listdir(path)
+    folders.sort()
+    for folder in folders:
+        imgs = os.listdir(os.path.join(path, folder, 'Sal'))
+        imgs.sort()
+        for i in range(0, len(imgs)):
+            shutil.move(os.path.join(path, folder, 'Sal', imgs[i]), os.path.join(path, folder, imgs[i]))
+            if i == (len(imgs)-1):
+                os.rmdir(os.path.join(path, folder, 'Sal'))
+            # os.rename(os.path.join(path, folder, img))
+
+def generate_single_from_seq(root_path, save_path):
+    lines = open(root_path)
+    lines2 = open(save_path, 'w')
+    for i, line in enumerate(lines):
+        print(line.strip())
+        names = line.strip().split(',')
+        for i, name in enumerate(names):
+            if i > 1:
+                folder, img_name = name.split('/')
+                lines2.writelines('/home/ty/data/VOS_test/' + folder + '/Imgs/' + img_name + '.png 0\n')
+
+    lines.close()
+    lines2.close()
+
+def remove_pre(root):
+    folders = os.listdir(root)
+    folders.sort()
+    for folder in folders:
+        imgs = os.listdir(os.path.join(root, folder))
+        for img in imgs:
+            new_name = img.replace(folder + '_', '')
+            os.rename(os.path.join(root, folder, img), os.path.join(root, folder, new_name))
+
+
 if __name__ == '__main__':
     root = '/home/ty/data/Pre-train/DAVSOD'
     # save_path = '/home/qub/data/saliency/video_saliency/train_all_MSRA10K_seq_5f.txt'
     # root = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test'
     # gt_root = '/home/qub/data/saliency/VOS/GT'
     # save_path = '/home/qub/data/saliency/SegTrack-V2/SegTrackV2_test_5f.txt'
+
     save_path = '/home/ty/data/Pre-train/pretrain_all_DAVSOD.txt'
     # genrate_davis_test_single_imgs(root, save_path)
     # generate_seq_by_DUTS_TR(root, save_path)
@@ -293,5 +363,6 @@ if __name__ == '__main__':
     #
     # for i in range(rand_frame, rand_frame + k *clip_length, k):
     #     print('i = ', i)
+
 
 

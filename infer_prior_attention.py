@@ -15,7 +15,7 @@ import time
 torch.manual_seed(2018)
 
 # set which gpu to use
-torch.cuda.set_device(1)
+torch.cuda.set_device(0)
 
 # the following two args specify the location of the file of trained model (pth extension)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
@@ -60,6 +60,7 @@ to_pil = transforms.ToPILImage()
 # to_test = {'VOS': os.path.join(vos_path, 'VOS_test')}
 # gt_root = os.path.join(vos_path, 'GT')
 # imgs_path = os.path.join(vos_path, 'VOS_test_5f.txt')
+
 
 to_test = {'SegTrackV2': os.path.join(segtrack_path, 'SegTrackV2_rain_test')}
 gt_root = os.path.join(segtrack_path, 'GT')
